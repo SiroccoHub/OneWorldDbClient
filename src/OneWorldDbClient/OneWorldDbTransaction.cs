@@ -14,18 +14,18 @@ namespace OneWorldDbClient
     {
         public readonly Guid TransactionId;
 
-        public int TransactionNumber { get; private set; }
+        public int TransactionNumber { get; }
 
         private readonly ILogger<OneWorldDbTransaction<TDbContext>> _logger;
 
-        private readonly OneWorldDbTransactionManager<TDbContext> _oneWorldDbTransactionManager;
-        private readonly Func<DbConnection, TDbContext> _dbContextFactory;
+        private readonly OneWorldDbClientManager<TDbContext> _oneWorldDbClientManager;
+        private readonly Func<IDbConnection, IDbTransaction, TDbContext> _dbContextFactory;
 
-        private readonly DbConnection _dbConnection;
-        private DbTransaction _dbTransaction;
+        private readonly IDbConnection _dbConnection;
+        private IDbTransaction _dbTransaction;
         private TDbContext _dbContext;
 
-        public IsolationLevel IsolationLevel { get; private set; }
+        public IsolationLevel IsolationLevel { get; }
 
         private int _activeChildren = 0;
         private int _totalChildren = 0;
@@ -40,17 +40,17 @@ namespace OneWorldDbClient
         private OneWorldDbTransaction(
             Guid transactionId,
             int transactionNumber,
-            DbConnection dbConnection,
+            IDbConnection dbConnection,
             IsolationLevel isolationLevel,
-            OneWorldDbTransactionManager<TDbContext> oneWorldDbTransactionManager,
-            Func<DbConnection, TDbContext> dbContextFactory,
+            OneWorldDbClientManager<TDbContext> oneWorldDbClientManager,
+            Func<IDbConnection, IDbTransaction, TDbContext> dbContextFactory,
             ILogger<OneWorldDbTransaction<TDbContext>> logger)
         {
             TransactionId = transactionId;
             TransactionNumber = transactionNumber;
             _dbConnection = dbConnection;
             IsolationLevel = isolationLevel;
-            _oneWorldDbTransactionManager = oneWorldDbTransactionManager;
+            _oneWorldDbClientManager = oneWorldDbClientManager;
             _dbContextFactory = dbContextFactory;
             _logger = logger;
         }
@@ -59,10 +59,10 @@ namespace OneWorldDbClient
         public static OneWorldDbTransaction<TDbContext> CreateOneWorldDbTransaction(
             Guid transactionId,
             int transactionNumber,
-            DbConnection dbConnection,
+            IDbConnection dbConnection,
             IsolationLevel isolationLevel,
-            OneWorldDbTransactionManager<TDbContext> oneWorldDbTransactionManager,
-            Func<DbConnection, TDbContext> dbContextFactory,
+            OneWorldDbClientManager<TDbContext> oneWorldDbClientManager,
+            Func<IDbConnection, IDbTransaction, TDbContext> dbContextFactory,
             ILogger<OneWorldDbTransaction<TDbContext>> logger)
         {
             return new OneWorldDbTransaction<TDbContext>(
@@ -70,7 +70,7 @@ namespace OneWorldDbClient
                 transactionNumber,
                 dbConnection,
                 isolationLevel,
-                oneWorldDbTransactionManager,
+                oneWorldDbClientManager,
                 dbContextFactory,
                 logger);
         }
@@ -79,16 +79,13 @@ namespace OneWorldDbClient
         public async Task<OneWorldDbTransactionScope<TDbContext>> CreateTransactionScopeAsync()
         {
             if (_dbConnection.State != ConnectionState.Open)
-                await _dbConnection.OpenAsync();
+                await ((DbConnection)_dbConnection).OpenAsync();
 
             if (_dbTransaction == null)
-                _dbTransaction = _dbConnection.BeginTransaction(IsolationLevel);
+                _dbTransaction = ((DbConnection)_dbConnection).BeginTransaction(IsolationLevel);
 
             if (_dbContext == null && _dbContextFactory != null)
-            {
-                _dbContext = _dbContextFactory.Invoke(_dbConnection);
-                _dbContext.Database.UseTransaction(_dbTransaction);
-            }
+                _dbContext = _dbContextFactory.Invoke(_dbConnection, _dbTransaction);
 
             var ts = OneWorldDbTransactionScope<TDbContext>.Create(
                 _dbConnection,
@@ -105,23 +102,23 @@ namespace OneWorldDbClient
         }
 
 
-        public OneWorldDbTransactionVotingResult CommitPlease(OneWorldDbTransactionScope<TDbContext> ts)
+        public VotingResult CommitPlease(OneWorldDbTransactionScope<TDbContext> ts)
         {
             if (!_answers.TryUpdate(ts, true, null))
-                return OneWorldDbTransactionVotingResult.AlreadyVoted;
+                return VotingResult.AlreadyVoted;
 
             ++_beCommits;
-            return OneWorldDbTransactionVotingResult.VoteComplete;
+            return VotingResult.VoteComplete;
         }
 
 
-        public OneWorldDbTransactionVotingResult RollbackPlease(OneWorldDbTransactionScope<TDbContext> ts)
+        public VotingResult RollbackPlease(OneWorldDbTransactionScope<TDbContext> ts)
         {
             if (!_answers.TryUpdate(ts, false, null))
-                return OneWorldDbTransactionVotingResult.AlreadyVoted;
+                return VotingResult.AlreadyVoted;
 
             ++_beRollbacks;
-            return OneWorldDbTransactionVotingResult.VoteComplete;
+            return VotingResult.VoteComplete;
         }
 
 
@@ -134,7 +131,7 @@ namespace OneWorldDbClient
         public void Leave()
         {
             if (--_activeChildren == 0 && TransactionNumber != 0)
-                _oneWorldDbTransactionManager.SubTransactionFinalize(TransactionId);
+                _oneWorldDbClientManager.SubTransactionFinalize(TransactionId);
         }
 
 
@@ -150,7 +147,7 @@ namespace OneWorldDbClient
             if (disposing)
             {
                 _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransaction<TDbContext>)} start.");
-                _logger?.LogInformation($" totalChildren:{_totalChildren}/commits:{_beCommits}/rollbacks:{_beRollbacks}.");
+                _logger?.LogTrace($" totalChildren:{_totalChildren}/commits:{_beCommits}/rollbacks:{_beRollbacks}.");
 
                 if (_totalChildren == _beCommits)
                 {
@@ -163,17 +160,17 @@ namespace OneWorldDbClient
                     _logger?.LogInformation($" done Rollback().");
                 }
 
-                _logger?.LogInformation($" isNull _dbContext={_dbContext == null}");
+                _logger?.LogTrace($" isNull _dbContext={_dbContext == null}");
                 _dbContext?.Dispose();
 
-                _logger?.LogInformation($" isNull _dbTransaction={_dbTransaction == null}");
+                _logger?.LogTrace($" isNull _dbTransaction={_dbTransaction == null}");
                 _dbTransaction?.Dispose();
 
-                _logger?.LogInformation($" isNull _dbConnection={_dbConnection == null}");
+                _logger?.LogTrace($" isNull _dbConnection={_dbConnection == null}");
                 _dbConnection?.Close();
                 _dbConnection?.Dispose();
 
-                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransaction<TDbContext>)} ended.");
+                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransaction<TDbContext>)} done.");
             }
         }
 

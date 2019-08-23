@@ -23,8 +23,8 @@ namespace OneWorldDbClient
         {
             DbConnection = dbConnection;
             DbTransaction = dbTransaction;
-            _oneWorldDbTransaction = oneWorldDbTransaction;
             DbContext = dbContext;
+            _oneWorldDbTransaction = oneWorldDbTransaction;
         }
 
 
@@ -41,14 +41,14 @@ namespace OneWorldDbClient
                 oneWorldDbTransaction);
         }
 
-        public bool Commitable => _oneWorldDbTransaction.RollbacksAlreadyDecided() == 0;
+        public bool Committable => _oneWorldDbTransaction.RollbacksAlreadyDecided() == 0;
 
 
         public void VoteCommit()
         {
             var v = _oneWorldDbTransaction.CommitPlease(this);
 
-            if (v == OneWorldDbTransactionVotingResult.AlreadyVoted)
+            if (v == VotingResult.AlreadyVoted)
                 throw new InvalidOperationException($"already voted.");
 
             _voted = true;
@@ -59,7 +59,7 @@ namespace OneWorldDbClient
         {
             var v = _oneWorldDbTransaction.RollbackPlease(this);
 
-            if (v == OneWorldDbTransactionVotingResult.AlreadyVoted)
+            if (v == VotingResult.AlreadyVoted)
                 throw new InvalidOperationException($"already voted.");
 
             _voted = true;

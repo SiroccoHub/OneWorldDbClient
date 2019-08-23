@@ -2,20 +2,22 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
-using System.Data.Common;
-using System.Data.SqlClient;
+using System.Data;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
 
 
 namespace OneWorldDbClient
 {
-    public class OneWorldDbTransactionManager<TDbContext> : IDisposable where TDbContext : DbContext
+    public class OneWorldDbClientManager<TDbContext> : IDisposable where TDbContext : DbContext
     {
-        private readonly ILoggerFactory _loggingFactory;
-        private readonly ILogger<OneWorldDbTransactionManager<TDbContext>> _logger;
+        private readonly ILogger<OneWorldDbClientManager<TDbContext>> _logger;
+        private readonly ILogger<OneWorldDbTransaction<TDbContext>> _loggerTx;
 
         private readonly string _connectionString;
+
+        private readonly Func<string, IDbConnection> _dbConnectionFactory;
+        private readonly Func<IDbConnection, IDbTransaction, TDbContext> _dbContextFactory;
 
         private readonly ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>> _transactions
             = new ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>>();
@@ -23,18 +25,21 @@ namespace OneWorldDbClient
         private readonly ConcurrentStack<Guid> _publishedTransactionStack
             = new ConcurrentStack<Guid>();
 
-        private readonly Func<DbConnection, TDbContext> _dbContextFactory;
 
-
-        public OneWorldDbTransactionManager(
+        public OneWorldDbClientManager(
             string connectionString,
-            Func<DbConnection, TDbContext> dbContextFactory,
-            ILoggerFactory loggerFactory)
+            Func<IDbConnection, IDbTransaction, TDbContext> dbContextFactory,
+            Func<string, IDbConnection> dbConnectionFactory,
+            ILogger<OneWorldDbClientManager<TDbContext>> logger,
+            ILogger<OneWorldDbTransaction<TDbContext>> loggerTx)
         {
-            _loggingFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<OneWorldDbTransactionManager<TDbContext>>();
+            _logger = logger;
+            _loggerTx = loggerTx;
+
             _connectionString = connectionString;
-            _dbContextFactory = dbContextFactory;
+
+            _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
+            _dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
 
@@ -71,17 +76,14 @@ namespace OneWorldDbClient
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewAsync(
             IsolationLevel? isolationLevel = null)
         {
-            var conn = new SqlConnection(_connectionString);
-
             var firstTran = OneWorldDbTransaction<TDbContext>.CreateOneWorldDbTransaction(
                 Guid.NewGuid(),
                 _transactions.Count,
-                conn,
+                _dbConnectionFactory.Invoke(_connectionString),
                 isolationLevel ?? IsolationLevel.ReadCommitted,
                 this,
                 _dbContextFactory,
-                _loggingFactory.CreateLogger<OneWorldDbTransaction<TDbContext>>());
-
+                _loggerTx);
 
             if (!_transactions.TryAdd(firstTran.TransactionId, firstTran))
                 throw new InvalidProgramException($"duplicate transaction id {firstTran.TransactionId}");
@@ -143,7 +145,7 @@ namespace OneWorldDbClient
         {
             if (disposing)
             {
-                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransactionManager<TDbContext>)} start.");
+                _logger?.LogInformation($"Dispose {nameof(OneWorldDbClientManager<TDbContext>)} start.");
 
                 while (_publishedTransactionStack.Count > 0)
                 {
@@ -161,12 +163,12 @@ namespace OneWorldDbClient
                     }
                 }
 
-                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransactionManager<TDbContext>)} ended.");
+                _logger?.LogInformation($"Dispose {nameof(OneWorldDbClientManager<TDbContext>)} ended.");
             }
         }
 
 
-        ~OneWorldDbTransactionManager()
+        ~OneWorldDbClientManager()
         {
             Dispose(false);
         }

@@ -1,6 +1,6 @@
 ﻿namespace OneWorldDbClient
 {
-    public enum OneWorldDbTransactionVotingResult
+    public enum VotingResult
     {
         Undefined = 0,
         VoteComplete = 1,

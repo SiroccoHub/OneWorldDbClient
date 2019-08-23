@@ -5,6 +5,12 @@ VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneWorldDbClient", "src\OneWorldDbClient\OneWorldDbClient.csproj", "{34325DF8-6D65-4732-A38D-D2DACB74923A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BD0AC644-EB94-4D1F-B9F9-4949DDD5E030}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B1A7553-8B46-4A83-92DB-82AB1D131CB1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneWorldDbClient.SqlServer", "src\OneWorldDbClient.SqlServer\OneWorldDbClient.SqlServer.csproj", "{0E34201D-D329-4267-A0CF-102C6514F7FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +21,17 @@ Global
 		{34325DF8-6D65-4732-A38D-D2DACB74923A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34325DF8-6D65-4732-A38D-D2DACB74923A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34325DF8-6D65-4732-A38D-D2DACB74923A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E34201D-D329-4267-A0CF-102C6514F7FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E34201D-D329-4267-A0CF-102C6514F7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E34201D-D329-4267-A0CF-102C6514F7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E34201D-D329-4267-A0CF-102C6514F7FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{34325DF8-6D65-4732-A38D-D2DACB74923A} = {8B1A7553-8B46-4A83-92DB-82AB1D131CB1}
+		{0E34201D-D329-4267-A0CF-102C6514F7FF} = {8B1A7553-8B46-4A83-92DB-82AB1D131CB1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020A32F8-87F1-40DC-8292-16DA6EAD4A2F}

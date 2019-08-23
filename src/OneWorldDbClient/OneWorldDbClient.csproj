@@ -7,15 +7,6 @@
     <AssemblyName>OneWorldDbClient</AssemblyName>
     <PackageId>OneWorldDbClient</PackageId>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyAssemblyVersionAttribute>fasle</GenerateAssemblyAssemblyVersionAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyDescription>false</GenerateAssemblyDescription>
     <Version>0.1.0</Version>
 
     <Authors>@arichika (arichika.taniguchi) / team sirocco, LLC.</Authors>

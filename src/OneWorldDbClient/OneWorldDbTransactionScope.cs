@@ -1,17 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Data;
-using Microsoft.Extensions.Logging;
 
 namespace OneWorldDbClient
 {
-    public class OneWorldDbTransactionScope<T> : IDisposable
+    public class OneWorldDbTransactionScope<TDbContext> : IDisposable where TDbContext : DbContext
     {
         public readonly IDbConnection DbConnection;
         public readonly IDbTransaction DbTransaction;
         public readonly DbContext DbContext;
 
-        private readonly OneWorldDbTransaction<T> _oneWorldDbTransaction;
+        private readonly OneWorldDbTransaction<TDbContext> _oneWorldDbTransaction;
 
         private bool _voted;
 
@@ -20,7 +19,7 @@ namespace OneWorldDbClient
             IDbConnection dbConnection,
             IDbTransaction dbTransaction,
             DbContext dbContext,
-            OneWorldDbTransaction<T> oneWorldDbTransaction)
+            OneWorldDbTransaction<TDbContext> oneWorldDbTransaction)
         {
             DbConnection = dbConnection;
             DbTransaction = dbTransaction;
@@ -29,13 +28,13 @@ namespace OneWorldDbClient
         }
 
 
-        public static OneWorldDbTransactionScope<T> Create(
+        public static OneWorldDbTransactionScope<TDbContext> Create(
             IDbConnection dbConnection,
             IDbTransaction dbTransaction,
             DbContext dbContext,
-            OneWorldDbTransaction<T> oneWorldDbTransaction)
+            OneWorldDbTransaction<TDbContext> oneWorldDbTransaction)
         {
-            return new OneWorldDbTransactionScope<T>(
+            return new OneWorldDbTransactionScope<TDbContext>(
                 dbConnection,
                 dbTransaction,
                 dbContext,

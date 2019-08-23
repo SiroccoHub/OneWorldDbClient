@@ -1,37 +1,37 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace OneWorldDbClient
 {
     public static class DbContextExecuteAsyncExtensions
     {
-        public static async Task<List<T>> ExecuteQueryAsync<T>(
+        public static async Task<List<TResult>> ExecuteQueryAsync<TResult>(
             this DbContext ctx,
             string query,
-            Func<SqlDataReader, T> mapper) where T : new()
+            Func<SqlDataReader, TResult> mapper) where TResult : new()
         {
             return await ctx.ExecuteQueryAsync(null, query, null, mapper);
         }
 
-        public static async Task<List<T>> ExecuteQueryAsync<T>(
+        public static async Task<List<TResult>> ExecuteQueryAsync<TResult>(
             this DbContext ctx,
             string query,
             SqlParameter[] parameters,
-            Func<SqlDataReader, T> mapper) where T : new()
+            Func<SqlDataReader, TResult> mapper) where TResult : new()
         {
             return await ctx.ExecuteQueryAsync(null, query, parameters, mapper);
         }
 
-        public static async Task<List<T>> ExecuteQueryAsync<T>(
+        public static async Task<List<TResult>> ExecuteQueryAsync<TResult>(
             this DbContext ctx,
             IDbTransaction tx,
             string query,
             SqlParameter[] parameters,
-            Func<SqlDataReader, T> mapper) where T : new()
+            Func<SqlDataReader, TResult> mapper) where TResult : new()
         {
             var connection = (SqlConnection)ctx.Database.GetDbConnection();
 
@@ -50,7 +50,7 @@ namespace OneWorldDbClient
             if (connection.State == ConnectionState.Closed)
                 await connection.OpenAsync();
 
-            var results = new List<T>();
+            var results = new List<TResult>();
 
             using (var reader = await command.ExecuteReaderAsync())
             {

@@ -1,74 +1,64 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using IsolationLevel = System.Data.IsolationLevel;
 
 
 namespace OneWorldDbClient
 {
-    public class OneWorldDbTransactionManager<T> : IDisposable
+    public class OneWorldDbTransactionManager<TDbContext> : IDisposable where TDbContext : DbContext
     {
         private readonly ILoggerFactory _loggingFactory;
-        private readonly ILogger<OneWorldDbTransactionManager<T>> _logger;
+        private readonly ILogger<OneWorldDbTransactionManager<TDbContext>> _logger;
 
         private readonly string _connectionString;
 
-        private readonly ConcurrentDictionary<Guid, OneWorldDbTransaction<T>> _transactions
-            = new ConcurrentDictionary<Guid, OneWorldDbTransaction<T>>();
+        private readonly ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>> _transactions
+            = new ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>>();
 
         private readonly ConcurrentStack<Guid> _publishedTransactionStack
             = new ConcurrentStack<Guid>();
 
-
-        private static readonly object Initializing = new object();
-        private static bool _initialized;
+        private readonly Func<DbConnection, TDbContext> _dbContextFactory;
 
 
         public OneWorldDbTransactionManager(
             string connectionString,
+            Func<DbConnection, TDbContext> dbContextFactory,
             ILoggerFactory loggerFactory)
         {
             _loggingFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<OneWorldDbTransactionManager<T>>();
+            _logger = loggerFactory.CreateLogger<OneWorldDbTransactionManager<TDbContext>>();
             _connectionString = connectionString;
-
-            if (_initialized)
-                return;
-
-            lock (Initializing)
-            {
-                if (_initialized)
-                    return;
-
-                // ColumnAttributeTypeMapperBootstrap.Init();
-                _initialized = true;
-            }
+            _dbContextFactory = dbContextFactory;
         }
 
 
         /// <summary>
         /// トランザクションが存在すれば参加し、なければ新規に作成します。
         /// </summary>
-        /// <param name="iso">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
+        /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
         /// <returns></returns>
-        public async Task<OneWorldDbTransactionScope<T>> BeginTranRequiredAsync(
-            IsolationLevel? iso = null)
+        public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiredAsync(
+            IsolationLevel? isolationLevel = null)
         {
-            // 既存トランザクションがないので新規作成
+            // current tx not found. create new tx.
             if (!_publishedTransactionStack.TryPeek(out var latestTransactionId))
-                return await BeginTranRequiresNewAsync(iso);
+                return await BeginTranRequiresNewAsync(isolationLevel);
 
-            // 既存トランザクションが存在
+            // current tx found.
             if (!_transactions.TryGetValue(latestTransactionId, out var transaction))
                 throw new InvalidProgramException($"lost transaction {latestTransactionId}");
 
-            if (!iso.HasValue || iso == transaction.IsolationLevel)
+            if (!isolationLevel.HasValue || isolationLevel == transaction.IsolationLevel)
                 return await transaction.CreateTransactionScopeAsync();
 
             throw new InvalidOperationException(
-                $"{nameof(iso)} で指定されたトランザクション {iso} は、" +
+                $"{nameof(isolationLevel)} で指定されたトランザクション {isolationLevel} は、" +
                 $"既に存在するトランザクションレベル {transaction.IsolationLevel} と相違しています。");
         }
 
@@ -76,20 +66,21 @@ namespace OneWorldDbClient
         /// <summary>
         /// トランザクションを新規に開始します。
         /// </summary>
-        /// <param name="iso">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
+        /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
         /// <returns></returns>
-        public async Task<OneWorldDbTransactionScope<T>> BeginTranRequiresNewAsync(
-            IsolationLevel? iso = null)
+        public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewAsync(
+            IsolationLevel? isolationLevel = null)
         {
             var conn = new SqlConnection(_connectionString);
 
-            var firstTran = OneWorldDbTransaction<T>.CreateOneWorldDbTransaction(
+            var firstTran = OneWorldDbTransaction<TDbContext>.CreateOneWorldDbTransaction(
                 Guid.NewGuid(),
                 _transactions.Count,
                 conn,
-                iso ?? IsolationLevel.ReadCommitted,
+                isolationLevel ?? IsolationLevel.ReadCommitted,
                 this,
-                _loggingFactory.CreateLogger<OneWorldDbTransaction<T>>());
+                _dbContextFactory,
+                _loggingFactory.CreateLogger<OneWorldDbTransaction<TDbContext>>());
 
 
             if (!_transactions.TryAdd(firstTran.TransactionId, firstTran))
@@ -103,7 +94,7 @@ namespace OneWorldDbClient
 
         public void SubTransactionFinalize(Guid endedSubTransactionId)
         {
-            // 厳重すぎて、実行環境ではここまでやる必要ないはずなんだけど
+            // strictly, strictly, strictly...
             lock (_publishedTransactionStack)
             {
                 if (_publishedTransactionStack.TryPeek(out var latestTransactionId))
@@ -152,7 +143,7 @@ namespace OneWorldDbClient
         {
             if (disposing)
             {
-                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransactionManager<T>)} start.");
+                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransactionManager<TDbContext>)} start.");
 
                 while (_publishedTransactionStack.Count > 0)
                 {
@@ -170,7 +161,7 @@ namespace OneWorldDbClient
                     }
                 }
 
-                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransactionManager<T>)} ended.");
+                _logger?.LogInformation($"Dispose {nameof(OneWorldDbTransactionManager<TDbContext>)} ended.");
             }
         }
 

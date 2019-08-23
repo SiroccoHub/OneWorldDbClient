@@ -3,6 +3,30 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+
+    <AssemblyName>OneWorldDbClient</AssemblyName>
+    <PackageId>OneWorldDbClient</PackageId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyAssemblyVersionAttribute>fasle</GenerateAssemblyAssemblyVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateAssemblyDescription>false</GenerateAssemblyDescription>
+    <Version>0.1.0</Version>
+
+    <Authors>@arichika (arichika.taniguchi) / team sirocco, LLC.</Authors>
+    <Title>OneWorldDbClient</Title>
+    <Description>OneWorldDbClient is .NET Core / ASP.NET Core utility that handles ORM and EF Core transactions in a unified way.</Description>
+    <Copyright>MIT</Copyright>
+    <PackageTags>netcore;aspnetcore;</PackageTags>
+    <PackageReleaseNotes>This is "beta" release.</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/SiroccoHub/OneWorldDbClient</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SiroccoHub/OneWorldDbClient</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/SiroccoHub/OneWorldDbClient/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.60.6" />
+    <PackageReference Include="nunit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\N2UnitTestBase\N2UnitTestBase.csproj" />
+    <ProjectReference Include="..\OneWorldDbClient.SqlServer\OneWorldDbClient.SqlServer.csproj" />
+    <ProjectReference Include="..\OneWorldDbClient\OneWorldDbClient.csproj" />
+  </ItemGroup>
+
+</Project>

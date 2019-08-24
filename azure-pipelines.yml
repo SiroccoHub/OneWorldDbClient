@@ -1,0 +1,31 @@
+# master build
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-2019'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: set
+  displayName: 'echo enviroment values'
+
+- script: |
+    IF DEFINED N2_SQL_LOCAL_DB_RESET (
+        sqllocaldb stop N2SqlLocalDB
+        sqllocaldb delete N2SqlLocalDB
+        DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.mdf
+        DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.ldf
+    )
+    sqllocaldb create N2SqlLocalDB -s
+    sqllocaldb info N2SqlLocalDB
+  displayName: 'init sqllocaldb'
+
+- script: dotnet build --configuration $(buildConfiguration) OneWorldDbClient.sln
+  displayName: 'dotnet build $(buildConfiguration) OneWorldDbClient.sln'
+
+- script: dotnet test --configuration $(buildConfiguration) OneWorldDbClient.sln
+  displayName: 'dotnet test $(buildConfiguration) --collect "Code coverage" OneWorldDbClient.sln'

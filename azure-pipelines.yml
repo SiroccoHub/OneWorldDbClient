@@ -3,6 +3,14 @@
 trigger:
 - master
 
+pr:
+  branches:
+    include:
+    - master
+    - release/*
+    - releases/*
+    - feature/*
+
 pool:
   vmImage: 'windows-2019'
 

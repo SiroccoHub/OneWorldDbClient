@@ -17,7 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "N2UnitTestBase", "src\N2Uni
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A77A81F8-CA1F-4272-8888-00580DAC413E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneWorldDbClient.SampleWeb", "src\OneWorldDbClient.SampleWeb\OneWorldDbClient.SampleWeb.csproj", "{CEE8ED64-5646-464D-8FC1-4634453F0F11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneWorldDbClient.SampleWeb", "src\OneWorldDbClient.SampleWeb\OneWorldDbClient.SampleWeb.csproj", "{CEE8ED64-5646-464D-8FC1-4634453F0F11}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FBD60D32-1556-40F0-B463-C5EE57019919}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

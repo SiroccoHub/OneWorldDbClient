@@ -19,9 +19,17 @@ variables:
 
 steps:
 - task: UseDotNet@2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 2.2.401
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: UseDotNet@2
   displayName: 'Use dotnet sdk 3.x'
   inputs:
     version: 3.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
     includePreviewVersions: true
 
 - script: set

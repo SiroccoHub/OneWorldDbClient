@@ -12,7 +12,7 @@ By using OneWorldDbClient, you can safely share and use DB connections and trans
 
 ## Why is OneWorldDbClient?
 
-_Comming later._
+<https://medium.com/team-sirocco-publications/approach-of-db-transactions-using-asp-net-core-ef-core-orm-like-dapper-and-di-implementation-bf9a72b85237>
 
 ## Getting Started
 
@@ -32,4 +32,4 @@ Simply installing the following Nuget package:
 
 ### How to use in ASP NET Core
 
-_Comming later._
+<https://medium.com/team-sirocco-publications/approach-of-db-transactions-using-asp-net-core-ef-core-orm-like-dapper-and-di-implementation-bf9a72b85237>

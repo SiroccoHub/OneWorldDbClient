@@ -7,7 +7,7 @@
     <AssemblyName>OneWorldDbClient.SqlServer</AssemblyName>
     <PackageId>OneWorldDbClient.SqlServer</PackageId>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
 
     <Authors>@arichika (arichika.taniguchi) / team sirocco, LLC.</Authors>
     <Title>OneWorldDbClient.SqlServer</Title>

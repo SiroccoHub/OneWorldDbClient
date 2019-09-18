@@ -76,7 +76,10 @@ namespace OneWorldDbClient
         }
 
 
-        public async Task<OneWorldDbTransactionScope<TDbContext>> CreateTransactionScopeAsync()
+        public async Task<OneWorldDbTransactionScope<TDbContext>> CreateTransactionScopeAsync(
+            string memberName = "",
+            string sourceFilePath = "",
+            int sourceLineNumber = 0)
         {
             if (_dbConnection.State != ConnectionState.Open)
                 await ((DbConnection)_dbConnection).OpenAsync();
@@ -91,7 +94,11 @@ namespace OneWorldDbClient
                 _dbConnection,
                 _dbTransaction,
                 _dbContext,
-                this);
+                this,
+                _logger,
+                memberName,
+                sourceFilePath,
+                sourceLineNumber);
 
             ++_activeChildren;
             ++_totalChildren;

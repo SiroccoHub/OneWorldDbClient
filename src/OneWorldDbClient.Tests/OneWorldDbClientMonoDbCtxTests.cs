@@ -65,7 +65,9 @@ namespace OneWorldDbClient.Tests
                 {
                     using (var tx = await diInstance.BeginTranRequiredAsync(
                         IsolationLevel.ReadCommitted))
-                    { }
+                    {
+                        tx.VoteCommit();
+                    }
 
                     var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                     {
@@ -454,7 +456,7 @@ namespace OneWorldDbClient.Tests
 
 
                 // ========================================
-                // コミット + 忘れロールバック
+                // コミット + 忘れロールバック => Exception
                 // ========================================
                 using (var diInstance = CreateManager())
                 {
@@ -471,18 +473,25 @@ namespace OneWorldDbClient.Tests
                         tx.VoteCommit();
                     }
 
-                    using (var tx = await diInstance.BeginTranRequiredAsync(
-                        IsolationLevel.ReadCommitted))
+
+                    var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                     {
-                        Assert.IsTrue(tx.Committable);
+                        using (var tx = await diInstance.BeginTranRequiredAsync(
+                            IsolationLevel.ReadCommitted))
+                        {
+                            Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
-                        await tx.DbContext.SaveChangesAsync();
+                            tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            await tx.DbContext.SaveChangesAsync();
 
-                        Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
-                        // tx.VoteCommit(); // VoteCommit 忘れ　==> VoteRollback() の表現
-                    }
+                            // tx.VoteCommit(); // VoteCommit 忘れ　==> VoteRollback() の表現
+                        }
+                    });
+                    Assert.That(
+                        ex.Message,
+                        Is.EqualTo("Not voting."));
                 }
 
                 // Rollback されてる
@@ -542,18 +551,25 @@ namespace OneWorldDbClient.Tests
                 // ========================================
                 using (var diInstance = CreateManager())
                 {
-                    using (var tx = await diInstance.BeginTranRequiredAsync(
-                        IsolationLevel.ReadCommitted))
+                    var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                     {
-                        Assert.IsTrue(tx.Committable);
+                        using (var tx = await diInstance.BeginTranRequiredAsync(
+                            IsolationLevel.ReadCommitted))
+                        {
+                            Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
-                        await tx.DbContext.SaveChangesAsync();
+                            tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                            await tx.DbContext.SaveChangesAsync();
 
-                        Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
-                        // tx.VoteCommit(); // VoteCommit 忘れ　==> VoteRollback() の表現
-                    }
+                            // tx.VoteCommit(); // VoteCommit 忘れ　==> VoteRollback() の表現
+                        }
+                    });
+                    Assert.That(
+                        ex.Message,
+                        Is.EqualTo("Not voting."));
+
 
                     using (var tx = await diInstance.BeginTranRequiredAsync(
                         IsolationLevel.ReadCommitted))

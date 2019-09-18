@@ -47,20 +47,30 @@ namespace OneWorldDbClient
         /// トランザクションが存在すれば参加し、なければ新規に作成します。
         /// </summary>
         /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
+        /// <param name="memberName"></param>
+        /// <param name="sourceFilePath"></param>
+        /// <param name="sourceLineNumber"></param>
         /// <returns></returns>
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiredAsync(
-            IsolationLevel? isolationLevel = null)
+            IsolationLevel? isolationLevel = null,
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
             // current tx not found. create new tx.
             if (!_publishedTransactionStack.TryPeek(out var latestTransactionId))
-                return await BeginTranRequiresNewAsync(isolationLevel);
+                return await BeginTranRequiresNewInternalAsync(
+                    isolationLevel,
+                    memberName,
+                    sourceFilePath,
+                    sourceLineNumber);
 
             // current tx found.
             if (!_transactions.TryGetValue(latestTransactionId, out var transaction))
                 throw new InvalidProgramException($"lost transaction {latestTransactionId}");
 
             if (!isolationLevel.HasValue || isolationLevel == transaction.IsolationLevel)
-                return await transaction.CreateTransactionScopeAsync();
+                return await transaction.CreateTransactionScopeAsync(memberName, sourceFilePath, sourceLineNumber);
 
             throw new InvalidOperationException(
                 $"{nameof(isolationLevel)} で指定されたトランザクション {isolationLevel} は、" +
@@ -72,9 +82,37 @@ namespace OneWorldDbClient
         /// トランザクションを新規に開始します。
         /// </summary>
         /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
+        /// <param name="memberName"></param>
+        /// <param name="sourceFilePath"></param>
+        /// <param name="sourceLineNumber"></param>
         /// <returns></returns>
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewAsync(
-            IsolationLevel? isolationLevel = null)
+            IsolationLevel? isolationLevel = null,
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+        {
+            return await BeginTranRequiresNewInternalAsync(
+                isolationLevel,
+                memberName,
+                sourceFilePath,
+                sourceLineNumber);
+        }
+
+
+        /// <summary>
+        /// トランザクションを新規に開始する内部メソッド
+        /// </summary>
+        /// <param name="isolationLevel"></param>
+        /// <param name="memberName"></param>
+        /// <param name="sourceFilePath"></param>
+        /// <param name="sourceLineNumber"></param>
+        /// <returns></returns>
+        private async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewInternalAsync(
+            IsolationLevel? isolationLevel = null,
+            string memberName = "",
+            string sourceFilePath = "",
+            int sourceLineNumber = 0)
         {
             var firstTran = OneWorldDbTransaction<TDbContext>.CreateOneWorldDbTransaction(
                 Guid.NewGuid(),
@@ -90,8 +128,9 @@ namespace OneWorldDbClient
 
             _publishedTransactionStack.Push(firstTran.TransactionId);
 
-            return await firstTran.CreateTransactionScopeAsync();
+            return await firstTran.CreateTransactionScopeAsync(memberName, sourceFilePath, sourceLineNumber);
         }
+
 
 
         public void SubTransactionFinalize(Guid endedSubTransactionId)

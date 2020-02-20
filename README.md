@@ -41,3 +41,9 @@ Simply installing the following Nuget package:
 
 #### v0.2.0
 + Breaking chagne: Forgetting to vote is abnormal and throws an `InvalidOperationException()`.
+
+#### v1.0.0
++ Change Dependencies.
+  + `Microsoft.Data.SqlClient` is used instead of `System.Data.SqlClient`
+    + https://docs.microsoft.com/en-us/ef/core/what-is-new/ef-core-3.0/breaking-changes#SqlClient
++ Update Dependencies.

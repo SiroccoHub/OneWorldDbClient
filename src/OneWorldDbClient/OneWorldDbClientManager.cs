@@ -1,29 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Data;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using IsolationLevel = System.Data.IsolationLevel;
-
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace OneWorldDbClient
 {
     public class OneWorldDbClientManager<TDbContext> : IDisposable where TDbContext : DbContext
     {
-        private readonly ILogger<OneWorldDbClientManager<TDbContext>> _logger;
-        private readonly ILogger<OneWorldDbTransaction<TDbContext>> _loggerTx;
-
         private readonly string _connectionString;
 
         private readonly Func<string, IDbConnection> _dbConnectionFactory;
         private readonly Func<IDbConnection, IDbTransaction, TDbContext> _dbContextFactory;
-
-        private readonly ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>> _transactions
-            = new ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>>();
+        private readonly ILogger<OneWorldDbClientManager<TDbContext>> _logger;
+        private readonly ILogger<OneWorldDbTransaction<TDbContext>> _loggerTx;
 
         private readonly ConcurrentStack<Guid> _publishedTransactionStack
             = new ConcurrentStack<Guid>();
+
+        private readonly ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>> _transactions
+            = new ConcurrentDictionary<Guid, OneWorldDbTransaction<TDbContext>>();
 
 
         public OneWorldDbClientManager(
@@ -43,8 +41,15 @@ namespace OneWorldDbClient
         }
 
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
         /// <summary>
-        /// トランザクションが存在すれば参加し、なければ新規に作成します。
+        ///     トランザクションが存在すれば参加し、なければ新規に作成します。
         /// </summary>
         /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
         /// <param name="memberName"></param>
@@ -53,9 +58,9 @@ namespace OneWorldDbClient
         /// <returns></returns>
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiredAsync(
             IsolationLevel? isolationLevel = null,
-            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
-            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
-            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
         {
             // current tx not found. create new tx.
             if (!_publishedTransactionStack.TryPeek(out var latestTransactionId))
@@ -79,7 +84,7 @@ namespace OneWorldDbClient
 
 
         /// <summary>
-        /// トランザクションを新規に開始します。
+        ///     トランザクションを新規に開始します。
         /// </summary>
         /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
         /// <param name="memberName"></param>
@@ -88,9 +93,9 @@ namespace OneWorldDbClient
         /// <returns></returns>
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewAsync(
             IsolationLevel? isolationLevel = null,
-            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
-            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
-            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
         {
             return await BeginTranRequiresNewInternalAsync(
                 isolationLevel,
@@ -101,7 +106,7 @@ namespace OneWorldDbClient
 
 
         /// <summary>
-        /// トランザクションを新規に開始する内部メソッド
+        ///     トランザクションを新規に開始する内部メソッド
         /// </summary>
         /// <param name="isolationLevel"></param>
         /// <param name="memberName"></param>
@@ -132,7 +137,6 @@ namespace OneWorldDbClient
         }
 
 
-
         public void SubTransactionFinalize(Guid endedSubTransactionId)
         {
             // strictly, strictly, strictly...
@@ -157,12 +161,14 @@ namespace OneWorldDbClient
                         }
                         else
                         {
-                            throw new InvalidOperationException($"failed {nameof(_publishedTransactionStack)} 's TryPeek().");
+                            throw new InvalidOperationException(
+                                $"failed {nameof(_publishedTransactionStack)} 's TryPeek().");
                         }
                     }
                     else
                     {
-                        throw new InvalidOperationException($"{nameof(latestTransactionId)} {latestTransactionId} and {endedSubTransactionId} are different.");
+                        throw new InvalidOperationException(
+                            $"{nameof(latestTransactionId)} {latestTransactionId} and {endedSubTransactionId} are different.");
                     }
                 }
                 else
@@ -170,13 +176,6 @@ namespace OneWorldDbClient
                     throw new InvalidOperationException($"failed {nameof(_publishedTransactionStack)} 's TryPeek().");
                 }
             }
-        }
-
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
 

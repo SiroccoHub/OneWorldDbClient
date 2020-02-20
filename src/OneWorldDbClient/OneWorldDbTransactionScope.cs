@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace OneWorldDbClient
 {
@@ -9,17 +9,17 @@ namespace OneWorldDbClient
     {
         private readonly ILogger<OneWorldDbTransaction<TDbContext>> _logger;
 
-        public readonly IDbConnection DbConnection;
-        public readonly IDbTransaction DbTransaction;
-        public readonly DbContext DbContext;
+        private readonly string _memberName;
 
         private readonly OneWorldDbTransaction<TDbContext> _oneWorldDbTransaction;
-
-        private bool _voted;
-
-        private readonly string _memberName;
         private readonly string _sourceFilePath;
         private readonly int _sourceLineNumber;
+
+        public readonly IDbConnection DbConnection;
+        public readonly DbContext DbContext;
+        public readonly IDbTransaction DbTransaction;
+
+        private bool _voted;
 
 
         private OneWorldDbTransactionScope(
@@ -44,6 +44,15 @@ namespace OneWorldDbClient
             _sourceLineNumber = sourceLineNumber;
         }
 
+        public bool Committable => _oneWorldDbTransaction.RollbacksAlreadyDecided() == 0;
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
 
         public static OneWorldDbTransactionScope<TDbContext> Create(
             IDbConnection dbConnection,
@@ -66,15 +75,13 @@ namespace OneWorldDbClient
                 sourceLineNumber);
         }
 
-        public bool Committable => _oneWorldDbTransaction.RollbacksAlreadyDecided() == 0;
-
 
         public void VoteCommit()
         {
             var v = _oneWorldDbTransaction.CommitPlease(this);
 
             if (v == VotingResult.AlreadyVoted)
-                throw new InvalidOperationException($"already voted.");
+                throw new InvalidOperationException("already voted.");
 
             _voted = true;
 
@@ -87,18 +94,11 @@ namespace OneWorldDbClient
             var v = _oneWorldDbTransaction.RollbackPlease(this);
 
             if (v == VotingResult.AlreadyVoted)
-                throw new InvalidOperationException($"already voted.");
+                throw new InvalidOperationException("already voted.");
 
             _voted = true;
 
             _logger.LogWarning($"VoteCommit(),{_memberName},{_sourceFilePath},{_sourceLineNumber}");
-        }
-
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
 
@@ -111,14 +111,14 @@ namespace OneWorldDbClient
                     _oneWorldDbTransaction.RollbackPlease(this);
 
                     _logger.LogError($"Not voting,{_memberName},{_sourceFilePath},{_sourceLineNumber}");
-                    throw new InvalidOperationException($"Not voting.")
+                    throw new InvalidOperationException("Not voting.")
                     {
                         Source = _memberName,
                         Data =
                         {
-                            { "memberName",_memberName},
-                            { "sourceFilePath",_sourceFilePath},
-                            { "sourceLineNumber",_sourceLineNumber},
+                            {"memberName", _memberName},
+                            {"sourceFilePath", _sourceFilePath},
+                            {"sourceLineNumber", _sourceLineNumber}
                         }
                     };
                 }

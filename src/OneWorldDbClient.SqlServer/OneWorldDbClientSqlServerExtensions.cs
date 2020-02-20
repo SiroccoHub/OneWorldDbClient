@@ -1,9 +1,9 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace OneWorldDbClient.SqlServer
 {
@@ -34,7 +34,7 @@ namespace OneWorldDbClient.SqlServer
             this DbContext ctx,
             string query,
             Func<IDataReader, TResult> mapper
-            ) where TResult : new()
+        ) where TResult : new()
         {
             return await ctx.ExecuteQueryAsync(null, query, null, mapper);
         }
@@ -45,7 +45,7 @@ namespace OneWorldDbClient.SqlServer
             string query,
             IDataParameter[] parameters,
             Func<IDataReader, TResult> mapper
-            ) where TResult : new()
+        ) where TResult : new()
         {
             return await ctx.ExecuteQueryAsync(null, query, parameters, mapper);
         }
@@ -57,7 +57,7 @@ namespace OneWorldDbClient.SqlServer
             string query,
             IDataParameter[] parameters,
             Func<IDataReader, TResult> mapper
-            ) where TResult : new()
+        ) where TResult : new()
         {
             var connection = ctx.Database.GetDbConnection();
 
@@ -81,18 +81,12 @@ namespace OneWorldDbClient.SqlServer
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {
-                    while (reader.Read())
-                    {
-                        results.Add(mapper(reader));
-                    }
+                    while (reader.Read()) results.Add(mapper(reader));
                 }
 
                 return results;
             }
         }
-
-
-
 
 
         public static async Task<int> ExecuteNonQueryAsync<TDbContext>(

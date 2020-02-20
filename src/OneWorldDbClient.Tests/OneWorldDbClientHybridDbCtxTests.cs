@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using N2UnitTestBase;
@@ -6,7 +7,6 @@ using NUnit.Framework;
 using OneWorldDbClient.Tests.Model;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 

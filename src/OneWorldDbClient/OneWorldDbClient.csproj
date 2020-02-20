@@ -14,11 +14,16 @@
     <Description>OneWorldDbClient is .NET Core / ASP.NET Core utility that handles ORM and EF Core transactions in a unified way.</Description>
     <Copyright>MIT</Copyright>
     <PackageTags>netcore;aspnetcore;</PackageTags>
-    <PackageReleaseNotes>This is "beta" release.</PackageReleaseNotes>
+    <PackageReleaseNotes>Thank you for your contributuions.</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/SiroccoHub/OneWorldDbClient</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SiroccoHub/OneWorldDbClient</RepositoryUrl>
     <PackageLicense>https://github.com/SiroccoHub/OneWorldDbClient/blob/master/LICENSE</PackageLicense>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="../../LICENSE" Pack="true" PackagePath="/" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />

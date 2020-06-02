@@ -39,9 +39,9 @@ namespace OneWorldDbClient.Tests
                 {
                     var dbContext = new OneWorldDbUnitTestDbContext(
                         new DbContextOptionsBuilder<OneWorldDbUnitTestDbContext>()
-                            .UseSqlServer((DbConnection)conn)
+                            .UseSqlServer((DbConnection) conn)
                             .Options);
-                    dbContext.Database.UseTransaction((SqlTransaction)tx);
+                    dbContext.Database.UseTransaction((SqlTransaction) tx);
                     return dbContext;
                 },
                 connStr => new SqlConnection(connStr),
@@ -55,7 +55,7 @@ namespace OneWorldDbClient.Tests
         {
             using (var n2DbContext = new N2SqlLocalDbContext<OneWorldDbUnitTestDbContext>(
                 CreateConnectionString(),
-                    _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>)_)))
+                _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>) _)))
             {
 
                 // ========================================
@@ -73,11 +73,13 @@ namespace OneWorldDbClient.Tests
                     {
                         using (var tx = await diInstance.BeginTranRequiredAsync(
                             IsolationLevel.ReadUncommitted))
-                        { }
+                        {
+                        }
                     });
                     Assert.That(
                         ex.Message,
-                        Is.EqualTo("isolationLevel で指定されたトランザクション ReadUncommitted は、既に存在するトランザクションレベル ReadCommitted と相違しています。"));
+                        Is.EqualTo(
+                            "isolationLevel で指定されたトランザクション ReadUncommitted は、既に存在するトランザクションレベル ReadCommitted と相違しています。"));
                 }
 
 
@@ -96,7 +98,7 @@ namespace OneWorldDbClient.Tests
                     });
                     Assert.That(
                         ex.Message,
-                        Is.EqualTo("already voted."));
+                        Is.EqualTo("Already voted."));
                 }
 
 
@@ -115,7 +117,7 @@ namespace OneWorldDbClient.Tests
                     });
                     Assert.That(
                         ex.Message,
-                        Is.EqualTo("already voted."));
+                        Is.EqualTo("Already voted."));
                 }
 
 
@@ -134,7 +136,7 @@ namespace OneWorldDbClient.Tests
                     });
                     Assert.That(
                         ex.Message,
-                        Is.EqualTo("already voted."));
+                        Is.EqualTo("Already voted."));
                 }
 
 
@@ -153,7 +155,7 @@ namespace OneWorldDbClient.Tests
                     });
                     Assert.That(
                         ex.Message,
-                        Is.EqualTo("already voted."));
+                        Is.EqualTo("Already voted."));
                 }
             }
 
@@ -167,7 +169,7 @@ namespace OneWorldDbClient.Tests
         {
             using (var n2DbContext = new N2SqlLocalDbContext<OneWorldDbUnitTestDbContext>(
                 CreateConnectionString(),
-                _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>)_)))
+                _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>) _)))
             {
 
                 // reset
@@ -190,7 +192,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -220,7 +222,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -248,7 +250,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -261,7 +263,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -271,8 +273,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // 全て Commit されてる
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -290,7 +294,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>()
@@ -304,7 +308,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -314,8 +318,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // 全て Commit されてる
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -333,7 +339,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -346,7 +352,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -356,8 +362,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Rollback されてる
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -375,7 +383,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -391,7 +399,7 @@ namespace OneWorldDbClient.Tests
 
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -401,8 +409,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // 前者 Commit /後者 Rollback
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -420,7 +430,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -436,7 +446,7 @@ namespace OneWorldDbClient.Tests
 
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -446,8 +456,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // 前者 Commit /後者 Rollback
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -465,7 +477,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -481,10 +493,11 @@ namespace OneWorldDbClient.Tests
                         {
                             Assert.IsTrue(tx.Committable);
 
-                            tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                             await tx.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                             // tx.VoteCommit(); // VoteCommit 忘れ　==> VoteRollback() の表現
                         }
@@ -495,8 +508,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Rollback されてる
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -514,7 +529,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -527,7 +542,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsFalse(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -537,8 +552,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Rollback されてる
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -558,10 +575,11 @@ namespace OneWorldDbClient.Tests
                         {
                             Assert.IsTrue(tx.Committable);
 
-                            tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                            tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                             await tx.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
                             // tx.VoteCommit(); // VoteCommit 忘れ　==> VoteRollback() の表現
                         }
@@ -576,7 +594,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsFalse(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -586,8 +604,10 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Rollback されてる
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -605,7 +625,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -617,7 +637,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -630,7 +650,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
@@ -640,10 +660,14 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Commit / Rollback / Commit
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z@@@@"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z@@@@"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -661,7 +685,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -673,7 +697,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -685,7 +709,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z%%%%" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z%%%%"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z%%%%"));
@@ -698,7 +722,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
@@ -708,10 +732,14 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Rollback / Rollback / Commit / Rollback
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z%%%%"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"!!!!"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z%%%%"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"!!!!"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -730,7 +758,7 @@ namespace OneWorldDbClient.Tests
         {
             using (var n2DbContext = new N2SqlLocalDbContext<OneWorldDbUnitTestDbContext>(
                 CreateConnectionString(),
-                _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>)_)))
+                _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>) _)))
             {
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -752,7 +780,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -767,7 +795,7 @@ namespace OneWorldDbClient.Tests
                         // BeginTranRequiresNewAsync だけど ReadUncommitted なので見える
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -777,10 +805,11 @@ namespace OneWorldDbClient.Tests
                         {
                             Assert.IsTrue(tx1.Committable);
 
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z@@@@" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z@@@@"});
                             await tx1.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z@@@@"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z@@@@"));
 
                             tx1.VoteCommit();
                         }
@@ -793,7 +822,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
@@ -803,10 +832,14 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Commit / Rollback / Commit
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z@@@@"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z@@@@"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -824,7 +857,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -834,28 +867,32 @@ namespace OneWorldDbClient.Tests
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
                             // 見えてるべき
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
                             Assert.IsTrue(tx1.Committable);
 
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                             await tx1.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
 
                             // Layer 3
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
                                 // 見えてるべき
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                                 Assert.IsTrue(tx2.Committable);
 
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                                 await tx2.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                                 tx2.VoteRollback();
                             }
@@ -888,7 +925,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -898,28 +935,32 @@ namespace OneWorldDbClient.Tests
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
                             // 見えてるべき
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
                             Assert.IsTrue(tx1.Committable);
 
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                             await tx1.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
 
                             // Layer 3
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
                                 // 見えてるべき
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                                 Assert.IsTrue(tx2.Committable);
 
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                                 await tx2.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                                 tx2.VoteRollback();
                             }
@@ -952,7 +993,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -962,28 +1003,32 @@ namespace OneWorldDbClient.Tests
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
                             // 見えてるべき
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
                             Assert.IsTrue(tx1.Committable);
 
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                             await tx1.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
 
                             // Layer 3A
                             using (var tx2A = await diInstance.BeginTranRequiredAsync())
                             {
                                 // 見えてるべき
-                                Assert.AreEqual(1, tx2A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                                Assert.AreEqual(1,
+                                    tx2A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                                 Assert.IsTrue(tx2A.Committable);
 
-                                tx2A.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                                tx2A.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                                 await tx2A.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx2A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                Assert.AreEqual(1,
+                                    tx2A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                                 tx2A.VoteRollback();
                             }
@@ -992,15 +1037,18 @@ namespace OneWorldDbClient.Tests
                             using (var tx2B = await diInstance.BeginTranRequiredAsync())
                             {
                                 // 見えてるべき
-                                Assert.AreEqual(1, tx2B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
-                                Assert.AreEqual(1, tx2B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                Assert.AreEqual(1,
+                                    tx2B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                                Assert.AreEqual(1,
+                                    tx2B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
-                                Assert.IsFalse(tx2B.Committable);  // tx2A.VoteRollback();
+                                Assert.IsFalse(tx2B.Committable); // tx2A.VoteRollback();
 
-                                tx2B.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"ZZ$$$$" });
+                                tx2B.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"ZZ$$$$"});
                                 await tx2B.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx2B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"ZZ$$$$"));
+                                Assert.AreEqual(1,
+                                    tx2B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"ZZ$$$$"));
 
                                 tx2B.VoteCommit();
                             }
@@ -1033,7 +1081,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -1043,28 +1091,32 @@ namespace OneWorldDbClient.Tests
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
                             // 見えてるべき
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
                             Assert.IsTrue(tx1.Committable);
 
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                             await tx1.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
 
                             // Layer 3
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
                                 // 見えてるべき
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                                 Assert.IsTrue(tx2.Committable);
 
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                                 await tx2.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                                 tx2.VoteCommit();
                             }
@@ -1097,7 +1149,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx0.Committable);
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -1107,28 +1159,32 @@ namespace OneWorldDbClient.Tests
                         using (var tx1A = await diInstance.BeginTranRequiredAsync())
                         {
                             // 見えてるべき
-                            Assert.AreEqual(1, tx1A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx1A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
                             Assert.IsTrue(tx1A.Committable);
-                            tx1A.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                            tx1A.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
 
                             await tx1A.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx1A.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
 
                             // Layer 3
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
                                 // 見えてるべき
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
 
                                 Assert.IsTrue(tx2.Committable);
 
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                                 await tx2.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                Assert.AreEqual(1,
+                                    tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                                 tx2.VoteCommit();
                             }
@@ -1140,16 +1196,20 @@ namespace OneWorldDbClient.Tests
                         using (var tx1B = await diInstance.BeginTranRequiredAsync())
                         {
                             // 見えてるべき
-                            Assert.AreEqual(1, tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                            Assert.AreEqual(1, tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
-                            Assert.AreEqual(1, tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                            Assert.AreEqual(1,
+                                tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                            Assert.AreEqual(1,
+                                tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
+                            Assert.AreEqual(1,
+                                tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
                             Assert.IsFalse(tx1B.Committable); // tx1A.VoteRollback();
 
-                            tx1B.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z$$$$" });
+                            tx1B.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z$$$$"});
                             await tx1B.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z$$$$"));
+                            Assert.AreEqual(1,
+                                tx1B.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z$$$$"));
 
                             tx1B.VoteCommit();
                         }
@@ -1179,7 +1239,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z9999" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
@@ -1194,7 +1254,7 @@ namespace OneWorldDbClient.Tests
                         // BeginTranRequiresNewAsync ReadCommitted 見えない
                         Assert.AreEqual(0, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
 
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z____" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z____"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z____"));
@@ -1204,10 +1264,11 @@ namespace OneWorldDbClient.Tests
                         {
                             Assert.IsTrue(tx1.Committable);
 
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z@@@@" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z@@@@"});
                             await tx1.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z@@@@"));
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z@@@@"));
 
                             tx1.VoteCommit();
                         }
@@ -1221,7 +1282,7 @@ namespace OneWorldDbClient.Tests
                     {
                         Assert.IsTrue(tx.Committable);
 
-                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z!!!!" });
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z!!!!"});
                         await tx.DbContext.SaveChangesAsync();
 
                         Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
@@ -1232,47 +1293,58 @@ namespace OneWorldDbClient.Tests
                             Assert.IsTrue(tx0.Committable);
 
                             // BeginTranRequiresNewAsync ReadUncommitted 見える
-                            Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                            Assert.AreEqual(1,
+                                tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
-                            tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z++++" });
+                            tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z++++"});
                             await tx0.DbContext.SaveChangesAsync();
 
-                            Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z++++"));
+                            Assert.AreEqual(1,
+                                tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z++++"));
 
 
                             using (var tx1 = await diInstance.BeginTranRequiredAsync())
                             {
                                 Assert.IsTrue(tx1.Committable);
 
-                                tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z----" });
+                                tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z----"});
                                 await tx1.DbContext.SaveChangesAsync();
 
-                                Assert.AreEqual(1, tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z----"));
+                                Assert.AreEqual(1,
+                                    tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z----"));
 
 
-                                using (var tx2 = await diInstance.BeginTranRequiresNewAsync(IsolationLevel.ReadCommitted))
+                                using (var tx2 =
+                                    await diInstance.BeginTranRequiresNewAsync(IsolationLevel.ReadCommitted))
                                 {
                                     Assert.IsTrue(tx2.Committable);
 
                                     // BeginTranRequiresNewAsync ReadUncommitted 見える
-                                    Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                                    Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                                    Assert.AreEqual(1,
+                                        tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                                    Assert.AreEqual(1,
+                                        tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
 
 
-                                    tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z[[[[" });
+                                    tx2.DbContext.Set<SampleTable01>()
+                                        .Add(new SampleTable01 {SampleColumn01 = @"Z[[[["});
                                     await tx2.DbContext.SaveChangesAsync();
 
-                                    Assert.AreEqual(1, tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z[[[["));
+                                    Assert.AreEqual(1,
+                                        tx2.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z[[[["));
 
 
                                     using (var tx3 = await diInstance.BeginTranRequiredAsync())
                                     {
                                         Assert.IsTrue(tx3.Committable);
 
-                                        tx3.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z]]]]" });
+                                        tx3.DbContext.Set<SampleTable01>().Add(new SampleTable01
+                                            {SampleColumn01 = @"Z]]]]"});
                                         await tx3.DbContext.SaveChangesAsync();
 
-                                        Assert.AreEqual(1, tx3.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z]]]]"));
+                                        Assert.AreEqual(1,
+                                            tx3.DbContext.Set<SampleTable01>()
+                                                .Count(e => e.SampleColumn01 == @"Z]]]]"));
 
                                         tx3.VoteRollback();
                                     }
@@ -1295,14 +1367,22 @@ namespace OneWorldDbClient.Tests
                 }
 
                 // Commit / Rollback / Commit
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z@@@@"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z++++"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z----"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z[[[["));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z]]]]"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z____"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z@@@@"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z!!!!"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z++++"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z----"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z[[[["));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z]]]]"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -1317,35 +1397,37 @@ namespace OneWorldDbClient.Tests
                 {
                     using (var tx0 = await diInstance.BeginTranRequiredAsync())
                     {
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0001" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0001"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         tx0.VoteCommit();
 
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0002" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0002"});
                             await tx1.DbContext.SaveChangesAsync();
 
                             tx1.VoteCommit();
 
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0003" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0003"});
                                 await tx2.DbContext.SaveChangesAsync();
 
                                 tx2.VoteCommit();
 
                                 using (var tx3 = await diInstance.BeginTranRequiredAsync())
                                 {
-                                    tx3.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0004" });
+                                    tx3.DbContext.Set<SampleTable01>()
+                                        .Add(new SampleTable01 {SampleColumn01 = @"Z0004"});
                                     await tx3.DbContext.SaveChangesAsync();
 
                                     tx3.VoteCommit();
 
                                     using (var tx4 = await diInstance.BeginTranRequiredAsync())
                                     {
-                                        tx4.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0005" });
+                                        tx4.DbContext.Set<SampleTable01>().Add(new SampleTable01
+                                            {SampleColumn01 = @"Z0005"});
                                         await tx4.DbContext.SaveChangesAsync();
 
                                         tx4.VoteCommit();
@@ -1373,35 +1455,37 @@ namespace OneWorldDbClient.Tests
                 {
                     using (var tx0 = await diInstance.BeginTranRequiredAsync())
                     {
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0001" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0001"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         tx0.VoteCommit();
 
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0002" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0002"});
                             await tx1.DbContext.SaveChangesAsync();
 
                             tx1.VoteRollback();
 
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0003" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0003"});
                                 await tx2.DbContext.SaveChangesAsync();
 
                                 tx2.VoteCommit();
 
                                 using (var tx3 = await diInstance.BeginTranRequiredAsync())
                                 {
-                                    tx3.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0004" });
+                                    tx3.DbContext.Set<SampleTable01>()
+                                        .Add(new SampleTable01 {SampleColumn01 = @"Z0004"});
                                     await tx3.DbContext.SaveChangesAsync();
 
                                     tx3.VoteCommit();
 
                                     using (var tx4 = await diInstance.BeginTranRequiredAsync())
                                     {
-                                        tx4.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0005" });
+                                        tx4.DbContext.Set<SampleTable01>().Add(new SampleTable01
+                                            {SampleColumn01 = @"Z0005"});
                                         await tx4.DbContext.SaveChangesAsync();
 
                                         tx4.VoteRollback();
@@ -1429,40 +1513,43 @@ namespace OneWorldDbClient.Tests
                 {
                     using (var tx0 = await diInstance.BeginTranRequiresNewAsync())
                     {
-                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0001" });
+                        tx0.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0001"});
                         await tx0.DbContext.SaveChangesAsync();
 
                         tx0.VoteCommit();
 
                         using (var tx1 = await diInstance.BeginTranRequiredAsync())
                         {
-                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0002" });
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0002"});
                             await tx1.DbContext.SaveChangesAsync();
 
                             tx1.VoteCommit();
 
                             using (var tx2 = await diInstance.BeginTranRequiredAsync())
                             {
-                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0003" });
+                                tx2.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z0003"});
                                 await tx2.DbContext.SaveChangesAsync();
 
                                 tx2.VoteCommit();
 
                                 using (var tx3 = await diInstance.BeginTranRequiredAsync())
                                 {
-                                    tx3.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0004" });
+                                    tx3.DbContext.Set<SampleTable01>()
+                                        .Add(new SampleTable01 {SampleColumn01 = @"Z0004"});
                                     await tx3.DbContext.SaveChangesAsync();
 
                                     tx3.VoteCommit();
 
                                     using (var tx4 = await diInstance.BeginTranRequiresNewAsync())
                                     {
-                                        tx4.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0005" });
+                                        tx4.DbContext.Set<SampleTable01>().Add(new SampleTable01
+                                            {SampleColumn01 = @"Z0005"});
                                         await tx4.DbContext.SaveChangesAsync();
 
                                         using (var tx5 = await diInstance.BeginTranRequiresNewAsync())
                                         {
-                                            tx5.DbContext.Set<SampleTable01>().Add(new SampleTable01 { SampleColumn01 = @"Z0006" });
+                                            tx5.DbContext.Set<SampleTable01>().Add(new SampleTable01
+                                                {SampleColumn01 = @"Z0006"});
                                             await tx5.DbContext.SaveChangesAsync();
 
                                             tx5.VoteCommit();
@@ -1480,9 +1567,12 @@ namespace OneWorldDbClient.Tests
                     5,
                     n2DbContext.RawContext.Set<SampleTable01>().Count());
 
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z0004"));
-                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>().SingleOrDefault(e => e.SampleColumn01 == @"Z0005"));
-                Assert.AreEqual(1, n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z0006"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z0004"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z0005"));
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z0006"));
 
                 // reset
                 n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
@@ -1490,6 +1580,85 @@ namespace OneWorldDbClient.Tests
             }
 
             Assert.Pass();
+        }
+
+
+
+
+        [Test]
+        public async Task AdditionsTxScope()
+        {
+            using (var n2DbContext = new N2SqlLocalDbContext<OneWorldDbUnitTestDbContext>(
+                CreateConnectionString(),
+                _ => new OneWorldDbUnitTestDbContext((DbContextOptions<OneWorldDbUnitTestDbContext>) _)))
+            {
+                // reset
+                n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
+                await n2DbContext.RawContext.SaveChangesAsync();
+
+                Assert.AreEqual(
+                    0,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count());
+
+                using (var diInstance = CreateManager())
+                {
+                    using (var tx = await diInstance.BeginTranRequiredAsync(
+                        IsolationLevel.ReadCommitted))
+                    {
+                        Assert.IsTrue(tx.Committable);
+
+                        tx.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z9999"});
+                        await tx.DbContext.SaveChangesAsync();
+
+                        Assert.AreEqual(1, tx.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+
+                        tx.VoteCommit();
+                    }
+                }
+
+                // ========================================
+                // First Tx is BeginTranRequiresNewAsync, with Sub Tx is BeginTranRequiredAsync, and VoteRollback first Tx.
+                // ========================================
+                using (var diInstance = CreateManager())
+                {
+                    using (var tx0 = await diInstance.BeginTranRequiresNewAsync(IsolationLevel.ReadCommitted))
+                    {
+                        using (var tx1 = await diInstance.BeginTranRequiredAsync())
+                        {
+                            tx1.DbContext.Set<SampleTable01>().Add(new SampleTable01 {SampleColumn01 = @"Z@@@1"});
+                            await tx1.DbContext.SaveChangesAsync();
+
+                            Assert.AreEqual(1,
+                                tx1.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z@@@1"));
+
+                            tx1.VoteCommit();
+                        }
+
+                        tx0.VoteRollback();
+                    }
+
+                    using (var tx0 = await diInstance.BeginTranRequiresNewAsync(IsolationLevel.ReadCommitted))
+                    {
+                        Assert.AreEqual(1, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+
+                        Assert.AreEqual(0, tx0.DbContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z@@@1"));
+
+                        tx0.VoteCommit();
+                    }
+                }
+
+                // Commit / Rollback / Commit
+                Assert.AreEqual(1,
+                    n2DbContext.RawContext.Set<SampleTable01>().Count(e => e.SampleColumn01 == @"Z9999"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z@@@1"));
+                Assert.IsNull(n2DbContext.RawContext.Set<SampleTable01>()
+                    .SingleOrDefault(e => e.SampleColumn01 == @"Z@@@2"));
+
+                // reset
+                n2DbContext.RawContext.Set<SampleTable01>().RemoveRange(n2DbContext.RawContext.SampleTable01);
+                await n2DbContext.RawContext.SaveChangesAsync();
+            }
         }
     }
 }

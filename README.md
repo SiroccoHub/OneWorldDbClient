@@ -36,14 +36,19 @@ Simply installing the following Nuget package:
 
 ### History
 
-#### v0.1.0
-+ First release.
-
-#### v0.2.0
-+ Breaking chagne: Forgetting to vote is abnormal and throws an `InvalidOperationException()`.
+#### v1.1.0
++ Fix invalid log comment.
++ Fix the `first transaction`'s behavior.
+  + The first `RequresNew` Tx has the *own scope*, The first `Requred` Tx has the *manager scope*. 
 
 #### v1.0.0
 + Change Dependencies.
   + `Microsoft.Data.SqlClient` is used instead of `System.Data.SqlClient`
     + https://docs.microsoft.com/en-us/ef/core/what-is-new/ef-core-3.0/breaking-changes#SqlClient
 + Update Dependencies.
+
+#### v0.2.0
++ Breaking chagne: Forgetting to vote is abnormal and throws an `InvalidOperationException()`.
+
+#### v0.1.0
++ First release.

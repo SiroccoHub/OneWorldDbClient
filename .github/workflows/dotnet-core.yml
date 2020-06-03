@@ -38,8 +38,8 @@ jobs:
         sqllocaldb info N2SqlLocalDB
       shell: cmd
     - name: Build
-      run: dotnet build --configuration $(buildConfiguration) --no-restore OneWorldDbClient.sln
-      shell: cmd
+      run: dotnet build --configuration ${env:buildConfiguration} --no-restore OneWorldDbClient.sln
+      shell: pwsh
     - name: Test
-      run: dotnet test --configuration $(buildConfiguration) --no-restore --verbosity normal OneWorldDbClient.sln
-      shell: cmd
+      run: dotnet test --configuration ${env:buildConfiguration} --no-restore --verbosity normal OneWorldDbClient.sln
+      shell: pwsh

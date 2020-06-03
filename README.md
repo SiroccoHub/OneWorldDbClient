@@ -2,7 +2,7 @@
 
 Documentation on using OneWorld Db Client is not available currently, sorry.
 
-![Run Build with Test](https://github.com/SiroccoHub/OneWorldDbClient/workflows/Run%20Build%20with%20Test/badge.svg)
+![Build with Test](https://github.com/SiroccoHub/OneWorldDbClient/workflows/Run%20Build%20with%20Test/badge.svg)
 
 ## What is OneWorldDbClient?
 

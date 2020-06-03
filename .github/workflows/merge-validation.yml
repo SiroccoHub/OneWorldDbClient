@@ -1,4 +1,4 @@
-name: Build with Test
+name: Merge Validation
 
 on:
   push:

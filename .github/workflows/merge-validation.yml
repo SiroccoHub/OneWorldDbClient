@@ -1,0 +1,42 @@
+name: Merge Validation
+
+on:
+  push:
+    branches: 
+    - master
+  pull_request:
+    branches: 
+    - master
+    - release/*
+    - releases/*
+    - feature/*
+jobs:
+  build-with-test:
+    runs-on: windows-2019
+    env:
+      buildConfiguration: Release
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Init sqllocaldb
+      run: |
+        IF DEFINED N2_SQL_LOCAL_DB_RESET (
+          sqllocaldb stop N2SqlLocalDB
+          sqllocaldb delete N2SqlLocalDB
+          DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.mdf
+          DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.ldf
+        )
+        sqllocaldb create N2SqlLocalDB -s
+        sqllocaldb info N2SqlLocalDB
+      shell: cmd
+    - name: Build
+      run: dotnet build --configuration ${env:buildConfiguration} --no-restore OneWorldDbClient.sln
+      shell: pwsh
+    - name: Test
+      run: dotnet test --configuration ${env:buildConfiguration} --no-restore --verbosity normal OneWorldDbClient.sln
+      shell: pwsh

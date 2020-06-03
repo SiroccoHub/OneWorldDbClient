@@ -2,7 +2,7 @@
 
 Documentation on using OneWorld Db Client is not available currently, sorry.
 
-[![Build Status](https://dev.azure.com/SiroccoHub/OneWorldDbClient/_apis/build/status/SiroccoHub.OneWorldDbClient?branchName=master)](https://dev.azure.com/SiroccoHub/OneWorldDbClient/_build/latest?definitionId=6&branchName=master)
+![Run Build with Test](https://github.com/SiroccoHub/OneWorldDbClient/workflows/Run%20Build%20with%20Test/badge.svg)
 
 ## What is OneWorldDbClient?
 

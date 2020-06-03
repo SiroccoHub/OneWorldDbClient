@@ -1,4 +1,4 @@
-name: Run Build with Test
+name: Build with Test
 
 on:
   push:
@@ -11,13 +11,10 @@ on:
     - releases/*
     - feature/*
 jobs:
-  build:
-
+  build & test:
     runs-on: windows-2019
-
     env:
       buildConfiguration: Release
-  
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core

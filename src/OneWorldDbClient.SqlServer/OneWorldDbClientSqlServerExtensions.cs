@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +19,7 @@ namespace OneWorldDbClient.SqlServer
         public static async Task<List<TResult>> ExecuteQueryAsync<TDbContext, TResult>(
             this OneWorldDbTransactionScope<TDbContext> txScope,
             string query,
-            IDataParameter[] parameters,
+            IDataParameter[]? parameters,
             Func<IDataReader, TResult> mapper
         ) where TResult : new() where TDbContext : DbContext
         {
@@ -53,39 +50,36 @@ namespace OneWorldDbClient.SqlServer
 
         public static async Task<List<TResult>> ExecuteQueryAsync<TResult>(
             this DbContext ctx,
-            IDbTransaction tx,
+            IDbTransaction? tx,
             string query,
-            IDataParameter[] parameters,
+            IDataParameter[]? parameters,
             Func<IDataReader, TResult> mapper
         ) where TResult : new()
         {
             var connection = ctx.Database.GetDbConnection();
 
-            using (
-                var command = new SqlCommand
-                {
-                    CommandText = query,
-                    CommandType = CommandType.Text,
-                    Connection = (SqlConnection)connection,
-                    Transaction = (SqlTransaction)tx
-                })
+            await using var command = new SqlCommand
             {
-                if (parameters != null)
-                    foreach (var param in parameters)
-                        command.Parameters.Add(param);
+                CommandText = query,
+                CommandType = CommandType.Text,
+                Connection = (SqlConnection)connection,
+                Transaction = (SqlTransaction?)tx
+            };
 
-                if (connection.State == ConnectionState.Closed)
-                    await connection.OpenAsync();
+            if (parameters != null)
+                foreach (var param in parameters)
+                    command.Parameters.Add(param);
 
-                var results = new List<TResult>();
+            if (connection.State == ConnectionState.Closed)
+                await connection.OpenAsync();
 
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (reader.Read()) results.Add(mapper(reader));
-                }
+            var results = new List<TResult>();
 
-                return results;
-            }
+            await using var reader = await command.ExecuteReaderAsync();
+
+            while (reader.Read()) results.Add(mapper(reader));
+
+            return results;
         }
 
 
@@ -101,7 +95,7 @@ namespace OneWorldDbClient.SqlServer
         public static async Task<int> ExecuteNonQueryAsync<TDbContext>(
             this OneWorldDbTransactionScope<TDbContext> txScope,
             string query,
-            IDataParameter[] parameters
+            IDataParameter[]? parameters
         ) where TDbContext : DbContext
         {
             return await txScope.DbContext.ExecuteNonQueryAsync(txScope.DbTransaction, query, parameters);
@@ -127,30 +121,28 @@ namespace OneWorldDbClient.SqlServer
 
         public static async Task<int> ExecuteNonQueryAsync(
             this DbContext ctx,
-            IDbTransaction tx,
+            IDbTransaction? tx,
             string query,
-            IDataParameter[] parameters)
+            IDataParameter[]? parameters)
         {
             var connection = ctx.Database.GetDbConnection();
 
-            using (
-                var command = new SqlCommand
-                {
-                    CommandText = query,
-                    CommandType = CommandType.Text,
-                    Connection = (SqlConnection)connection,
-                    Transaction = (SqlTransaction)tx
-                })
+            await using var command = new SqlCommand
             {
-                if (parameters != null)
-                    foreach (var param in parameters)
-                        command.Parameters.Add(param);
+                CommandText = query,
+                CommandType = CommandType.Text,
+                Connection = (SqlConnection)connection,
+                Transaction = (SqlTransaction?)tx
+            };
 
-                if (connection.State == ConnectionState.Closed)
-                    await connection.OpenAsync();
+            if (parameters != null)
+                foreach (var param in parameters)
+                    command.Parameters.Add(param);
 
-                return await command.ExecuteNonQueryAsync();
-            }
+            if (connection.State == ConnectionState.Closed)
+                await connection.OpenAsync();
+
+            return await command.ExecuteNonQueryAsync();
         }
     }
 }

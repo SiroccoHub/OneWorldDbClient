@@ -6,11 +6,11 @@
 :: SET N2_SQL_LOCAL_DB_RESET=1
 
 IF DEFINED N2_SQL_LOCAL_DB_RESET (
-    sqllocaldb stop N2SqlLocalDB
-    sqllocaldb delete N2SqlLocalDB
-    DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.mdf
-    DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.ldf
+    sqllocaldb stop N2SqlLocalDB0
+    sqllocaldb delete N2SqlLocalDB0
+    DEL /F /Q %USERPROFILE%\\N2SqlLocalDB0.*.mdf
+    DEL /F /Q %USERPROFILE%\\N2SqlLocalDB0.*.ldf
 )
 
-sqllocaldb create N2SqlLocalDB -s
-sqllocaldb info N2SqlLocalDB
+sqllocaldb create N2SqlLocalDB0 -s
+sqllocaldb info N2SqlLocalDB0

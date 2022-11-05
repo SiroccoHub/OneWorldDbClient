@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace N2UnitTestBase
 {
@@ -33,19 +32,18 @@ namespace N2UnitTestBase
         }
 
 
-        #region IDisposable Support
-        private bool disposedValue = false;
+        private bool _disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     RawContext.Dispose();
                 }
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 
@@ -55,6 +53,5 @@ namespace N2UnitTestBase
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
     }
 }

@@ -1,11 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace N2UnitTestBase
 {
@@ -17,9 +14,9 @@ namespace N2UnitTestBase
 
     public class N2SqlLocalDbTestBase<TDbContext> where TDbContext : DbContext
     {
-        public IConfigurationRoot ConfigurationRoot { get; private set; }
+        public IConfigurationRoot? ConfigurationRoot { get; private set; }
 
-        public void Setup()
+        public void Setup(int dbNumber = 0)
         {
             if (!N2SqlLocalDbTestBase.Initialized)
             {
@@ -29,7 +26,7 @@ namespace N2UnitTestBase
                     {
                         var app = new ProcessStartInfo
                         {
-                            FileName = ".\\Scripts\\InitN2SqlLocalDB.cmd",
+                            FileName = $".\\Scripts\\InitN2SqlLocalDB{dbNumber}.cmd",
                             CreateNoWindow = true,
                             UseShellExecute = false
                         };
@@ -39,6 +36,8 @@ namespace N2UnitTestBase
                     }
                 }
             }
+
+            DbNumber = dbNumber;
 
             var builder = new ConfigurationBuilder();
             builder.AddEnvironmentVariables();
@@ -51,34 +50,17 @@ namespace N2UnitTestBase
         }
 
 
-        /// <summary>
-        /// DB 元ネタ初期化
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="pathSeedDataQuery"></param>
-        /// <returns></returns>
-        public async Task<int> SeedingByQueryAsync(N2SqlLocalDbContext<TDbContext> context, string pathSeedDataQuery)
-        {
-            string q;
-
-            if (!string.IsNullOrEmpty(pathSeedDataQuery))
-                q = File.ReadAllText(pathSeedDataQuery);
-            else
-                throw new ArgumentNullException(nameof(pathSeedDataQuery));
-
-            return await context.RawContext.ExecuteNonQueryAsync(q);
-        }
+        public int DbNumber { get; set; } = 0;
 
 
-
-        private string InstanceName { get; } = "N2SqlLocalDB";
+        private string InstanceName => $"N2SqlLocalDB{DbNumber}";
 
         private string DatabaseNamePlaceHolder { get; } = "@DatabaseName@";
 
-        public string SqlLocalDbConnectionStringTemplate { get; set; } =
-            $"Data Source=(LocalDB)\\N2SqlLocalDB;Database=@DatabaseName@;Connect Timeout=60;";
+        public string SqlLocalDbConnectionStringTemplate => 
+            $"Data Source=(LocalDB)\\{InstanceName};Database=@DatabaseName@;Connect Timeout=60;";
 
-        public string CreateConnectionString(string additionalId = null, string customDatabaseName = null)
+        public string CreateConnectionString(string? additionalId = null, string? customDatabaseName = null)
         {
             return SqlLocalDbConnectionStringTemplate
                 .Replace(DatabaseNamePlaceHolder,
@@ -87,17 +69,16 @@ namespace N2UnitTestBase
 
         private static string GetMd5Hash(string input)
         {
-            using (var md5 = MD5.Create())
-            {
-                var data = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+            using var md5 = MD5.Create();
 
-                var sBuilder = new StringBuilder();
+            var data = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
 
-                foreach (var t in data)
-                    sBuilder.Append(t.ToString("x2"));
+            var sBuilder = new StringBuilder();
 
-                return sBuilder.ToString();
-            }
+            foreach (var t in data)
+                sBuilder.Append(t.ToString("x2"));
+
+            return sBuilder.ToString();
         }
     }
 }

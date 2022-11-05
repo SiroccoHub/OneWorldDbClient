@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Data;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -52,33 +49,24 @@ namespace OneWorldDbClient
         /// トランザクションが存在すれば参加し、なければ新規に作成します。
         /// </summary>
         /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
-        /// <param name="memberName"></param>
-        /// <param name="sourceFilePath"></param>
-        /// <param name="sourceLineNumber"></param>
         /// <returns></returns>
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiredAsync(
-            IsolationLevel? isolationLevel = null,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0)
+            IsolationLevel? isolationLevel = null)
         {
             // current tx not found. create new tx.
             if (!_publishedTransactionStack.TryPeek(out var latestTransactionId))
                 return await BeginTranRequiresNewInternalAsync(
                     isSuperRootTx: true,
-                    isolationLevel: isolationLevel,
-                    memberName: memberName,
-                    sourceFilePath: sourceFilePath,
-                    sourceLineNumber: sourceLineNumber);
+                    isolationLevel: isolationLevel);
 
             // current tx found.
             if (!_transactions.TryGetValue(latestTransactionId, out var transaction))
                 throw new InvalidProgramException($"lost transaction {latestTransactionId}");
 
-            _logger.LogInformation($" Required:TransactionNumber=`{transaction.TransactionNumber}`/TransactionId=`{transaction.TransactionId}`/IsolationLevel=`{transaction.IsolationLevel}`");
+            _logger.LogInformation(" Required:TransactionNumber=`{TransactionNumber}`/TransactionId=`{TransactionId}`/IsolationLevel=`{IsolationLevel}`", transaction.TransactionNumber, transaction.TransactionId, transaction.IsolationLevel);
 
             if (!isolationLevel.HasValue || isolationLevel == transaction.IsolationLevel)
-                return await transaction.CreateTransactionScopeAsync(memberName, sourceFilePath, sourceLineNumber);
+                return await transaction.CreateTransactionScopeAsync();
 
             throw new InvalidOperationException(
                 $"{nameof(isolationLevel)} で指定されたトランザクション {isolationLevel} は、既に存在するトランザクションレベル {transaction.IsolationLevel} と相違しています。");
@@ -89,22 +77,13 @@ namespace OneWorldDbClient
         /// トランザクションを新規に開始します。
         /// </summary>
         /// <param name="isolationLevel">null の場合、最初のトランザクションであれば IsolationLevel.ReadCommitted に、参加する場合は上位に依存します。</param>
-        /// <param name="memberName"></param>
-        /// <param name="sourceFilePath"></param>
-        /// <param name="sourceLineNumber"></param>
         /// <returns></returns>
         public async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewAsync(
-            IsolationLevel? isolationLevel = null,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0)
+            IsolationLevel? isolationLevel = null)
         {
             return await BeginTranRequiresNewInternalAsync(
                 isSuperRootTx: false,
-                isolationLevel: isolationLevel,
-                memberName: memberName,
-                sourceFilePath: sourceFilePath,
-                sourceLineNumber: sourceLineNumber);
+                isolationLevel: isolationLevel);
         }
 
 
@@ -113,16 +92,10 @@ namespace OneWorldDbClient
         /// </summary>
         /// <param name="isSuperRootTx"></param>
         /// <param name="isolationLevel"></param>
-        /// <param name="memberName"></param>
-        /// <param name="sourceFilePath"></param>
-        /// <param name="sourceLineNumber"></param>
         /// <returns></returns>
         private async Task<OneWorldDbTransactionScope<TDbContext>> BeginTranRequiresNewInternalAsync(
-            bool isSuperRootTx,
-            IsolationLevel? isolationLevel = null,
-            string memberName = "",
-            string sourceFilePath = "",
-            int sourceLineNumber = 0)
+            bool isSuperRootTx, 
+            IsolationLevel? isolationLevel = null)
         {
             var transactionNumber = isSuperRootTx ? -1 : _transactions.Count;
             var firstTran = 
@@ -135,48 +108,46 @@ namespace OneWorldDbClient
                     dbContextFactory: _dbContextFactory,
                     logger: _loggerTx);
 
-            _logger.LogInformation($" RequiresNew:isSuperRootTx=`{isSuperRootTx}`,TransactionNumber=`{firstTran.TransactionNumber}`/TransactionId=`{firstTran.TransactionId}`/IsolationLevel=`{firstTran.IsolationLevel}`");
+            _logger.LogInformation(" RequiresNew:isSuperRootTx=`{isSuperRootTx}`,TransactionNumber=`{TransactionNumber}`/TransactionId=`{TransactionId}`/IsolationLevel=`{IsolationLevel}`", isSuperRootTx, firstTran.TransactionNumber, firstTran.TransactionId, firstTran.IsolationLevel);
 
             if (!_transactions.TryAdd(firstTran.TransactionId, firstTran))
                 throw new InvalidProgramException($"duplicate transaction id {firstTran.TransactionId}");
 
             _publishedTransactionStack.Push(firstTran.TransactionId);
 
-            return await firstTran.CreateTransactionScopeAsync(memberName, sourceFilePath, sourceLineNumber);
+            return await firstTran.CreateTransactionScopeAsync();
         }
 
 
-        public void TransactionFinalize(Guid endedSubTransactionId)
+        internal void TransactionFinalize(Guid finalizeSubTransactionId)
         {
             lock (_publishedTransactionStack)
             {
-                if (_publishedTransactionStack.TryPeek(out var latestTransactionId))
+                if (_publishedTransactionStack.TryPeek(out var tranId))
                 {
-                    if (endedSubTransactionId == latestTransactionId)
+                    if (finalizeSubTransactionId == tranId)
                     {
                         if (_publishedTransactionStack.TryPop(out _))
                         {
-                            if (_transactions.TryRemove(endedSubTransactionId, out var transaction))
+                            if (_transactions.TryRemove(finalizeSubTransactionId, out var transaction))
                             {
-                                _logger?.LogTrace($" sub.tx={endedSubTransactionId} Disposing.");
+                                _logger.LogTrace(" sub.tx={finalizeSubTransactionId} Disposing.", finalizeSubTransactionId);
                                 transaction.Dispose();
-                                _logger?.LogDebug($" sub.tx={endedSubTransactionId} Disposed and Removed.");
+                                _logger.LogDebug(" sub.tx={finalizeSubTransactionId} Disposed and Removed.", finalizeSubTransactionId);
                             }
                             else
                             {
-                                _logger?.LogDebug($" sub.tx={endedSubTransactionId} Already Removed.");
+                                _logger.LogDebug(" sub.tx={finalizeSubTransactionId} Already Removed.", finalizeSubTransactionId);
                             }
                         }
                         else
                         {
-                            throw new InvalidOperationException(
-                                $"failed {nameof(_publishedTransactionStack)} 's TryPeek().");
+                            throw new InvalidOperationException($"failed {nameof(_publishedTransactionStack)} 's TryPop().");
                         }
                     }
                     else
                     {
-                        throw new InvalidOperationException(
-                            $"{nameof(latestTransactionId)} {latestTransactionId} and {endedSubTransactionId} are different.");
+                        throw new InvalidOperationException($"{nameof(tranId)} {tranId} and {finalizeSubTransactionId} are different.");
                     }
                 }
                 else
@@ -192,21 +163,21 @@ namespace OneWorldDbClient
             if (!disposing)
                 return;
 
-            _logger?.LogDebug($" Dispose {nameof(OneWorldDbClientManager<TDbContext>)} start.");
+            _logger.LogDebug($" Dispose {nameof(OneWorldDbClientManager<TDbContext>)} start.");
 
-            while (_publishedTransactionStack.Count > 0)
+            while (!_publishedTransactionStack.IsEmpty)
             {
-                _publishedTransactionStack.TryPop(out var latestTransactionId);
+                _publishedTransactionStack.TryPop(out var tranId);
 
-                if (_transactions.TryRemove(latestTransactionId, out var transaction))
+                if (_transactions.TryRemove(tranId, out var transaction))
                 {
-                    _logger?.LogDebug($" tx={latestTransactionId} Disposing.");
+                    _logger?.LogDebug(" tx={tranId} Disposing.", tranId);
                     transaction.Dispose();
-                    _logger?.LogDebug($" tx={latestTransactionId} Disposed and Removed.");
+                    _logger?.LogDebug(" tx={tranId} Disposed and Removed.", tranId);
                 }
                 else
                 {
-                    _logger?.LogDebug($" tx={latestTransactionId} Already Removed.");
+                    _logger?.LogDebug(" tx={tranId} Already Removed.", tranId);
                 }
             }
 

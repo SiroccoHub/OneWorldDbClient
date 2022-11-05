@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -9,11 +8,7 @@ namespace OneWorldDbClient
     {
         private readonly ILogger<OneWorldDbTransaction<TDbContext>> _logger;
 
-        private readonly string _memberName;
-
         private readonly OneWorldDbTransaction<TDbContext> _oneWorldDbTransaction;
-        private readonly string _sourceFilePath;
-        private readonly int _sourceLineNumber;
 
         public readonly IDbConnection DbConnection;
         public readonly DbContext DbContext;
@@ -27,10 +22,7 @@ namespace OneWorldDbClient
             IDbTransaction dbTransaction,
             DbContext dbContext,
             OneWorldDbTransaction<TDbContext> oneWorldDbTransaction,
-            ILogger<OneWorldDbTransaction<TDbContext>> logger,
-            string memberName = "",
-            string sourceFilePath = "",
-            int sourceLineNumber = 0)
+            ILogger<OneWorldDbTransaction<TDbContext>> logger)
         {
             DbConnection = dbConnection;
             DbTransaction = dbTransaction;
@@ -38,10 +30,6 @@ namespace OneWorldDbClient
             _oneWorldDbTransaction = oneWorldDbTransaction;
 
             _logger = logger;
-
-            _memberName = memberName;
-            _sourceFilePath = sourceFilePath;
-            _sourceLineNumber = sourceLineNumber;
         }
 
         public bool Committable => _oneWorldDbTransaction.RollbacksAlreadyDecided() == 0;
@@ -54,26 +42,19 @@ namespace OneWorldDbClient
         }
 
 
-        public static OneWorldDbTransactionScope<TDbContext> 
-            Create(
+        internal static OneWorldDbTransactionScope<TDbContext> Create(
                 IDbConnection dbConnection,
                 IDbTransaction dbTransaction,
                 DbContext dbContext,
                 OneWorldDbTransaction<TDbContext> oneWorldDbTransaction,
-                ILogger<OneWorldDbTransaction<TDbContext>> logger,
-                string memberName = "",
-                string sourceFilePath = "",
-                int sourceLineNumber = 0)
+                ILogger<OneWorldDbTransaction<TDbContext>> logger)
         {
             return new OneWorldDbTransactionScope<TDbContext>(
                 dbConnection,
                 dbTransaction,
                 dbContext,
                 oneWorldDbTransaction,
-                logger,
-                memberName,
-                sourceFilePath,
-                sourceLineNumber);
+                logger);
         }
 
 
@@ -86,7 +67,7 @@ namespace OneWorldDbClient
 
             _voted = true;
 
-            _logger.LogInformation($" VoteCommit(),`{_memberName}`,`{_sourceFilePath}`,`{_sourceLineNumber}`");
+            _logger.LogInformation($" VoteCommit()");
         }
 
 
@@ -99,7 +80,7 @@ namespace OneWorldDbClient
 
             _voted = true;
 
-            _logger.LogWarning($" VoteRollback(),`{_memberName}`,`{_sourceFilePath}`,`{_sourceLineNumber}`");
+            _logger.LogWarning($" VoteRollback()");
         }
 
 
@@ -112,17 +93,8 @@ namespace OneWorldDbClient
             {
                 _oneWorldDbTransaction.RollbackPlease(this);
 
-                _logger.LogCritical($" Not voting,`{_memberName}`,`{_sourceFilePath}`,`{_sourceLineNumber}`");
-                throw new InvalidOperationException("Not voting.")
-                {
-                    Source = _memberName,
-                    Data =
-                    {
-                        {"memberName", _memberName},
-                        {"sourceFilePath", _sourceFilePath},
-                        {"sourceLineNumber", _sourceLineNumber}
-                    }
-                };
+                _logger.LogCritical($" Not voting");
+                throw new InvalidOperationException("Not voting.");
             }
 
             _oneWorldDbTransaction.Leave();

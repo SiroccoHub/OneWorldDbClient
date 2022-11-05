@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using TestContext = NUnit.Framework.TestContext;
 
 namespace N2UnitTestBase

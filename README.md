@@ -36,6 +36,9 @@ Simply installing the following Nuget package:
 
 ### History
 
+#### v1.1.1-pre.1
++ Detailed logging. Explicitly specify `TDbContext` in the log.
+
 #### v1.1.0
 + Fix invalid log comment.
 + Fix the `first transaction`'s behavior.

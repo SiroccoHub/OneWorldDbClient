@@ -86,7 +86,7 @@ namespace OneWorldDbClient
 
             _voted = true;
 
-            _logger.LogInformation(" VoteCommit(),`{MemberName}`,`{SourceFilePath}`,`{SourceLineNumber}`, `{TDbContext}`", _memberName, _sourceFilePath, _sourceLineNumber, typeof(TDbContext));
+            _logger.LogInformation(" VoteCommit(),`{MemberName}`,`{SourceFilePath}`,`{SourceLineNumber}`,DbContext:`{TDbContext}`", _memberName, _sourceFilePath, _sourceLineNumber, typeof(TDbContext));
         }
 
 
@@ -99,7 +99,7 @@ namespace OneWorldDbClient
 
             _voted = true;
 
-            _logger.LogWarning(" VoteRollback(),`{MemberName}`,`{SourceFilePath}`,`{SourceLineNumber}`, `{TDbContext}`", _memberName, _sourceFilePath, _sourceLineNumber, typeof(TDbContext));
+            _logger.LogWarning(" VoteRollback(),`{MemberName}`,`{SourceFilePath}`,`{SourceLineNumber}`,DbContext:`{TDbContext}`", _memberName, _sourceFilePath, _sourceLineNumber, typeof(TDbContext));
         }
 
 
@@ -112,7 +112,7 @@ namespace OneWorldDbClient
             {
                 _oneWorldDbTransaction.RollbackPlease(this);
 
-                _logger.LogCritical(" Not voting,`{MemberName}`,`{SourceFilePath}`,`{SourceLineNumber}`, `{TDbContext}`", _memberName, _sourceFilePath, _sourceLineNumber, typeof(TDbContext));
+                _logger.LogCritical(" Not voting,`{MemberName}`,`{SourceFilePath}`,`{SourceLineNumber}`,DbContext:`{TDbContext}`", _memberName, _sourceFilePath, _sourceLineNumber, typeof(TDbContext));
                 throw new InvalidOperationException("Not voting.")
                 {
                     Source = _memberName,

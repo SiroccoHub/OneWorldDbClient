@@ -36,6 +36,9 @@ Simply installing the following Nuget package:
 
 ### History
 
+#### 1.1.1-preview.2
++ Detailed logging. Explicitly specify `ConnectionStringLength` in the log.
+
 #### 1.1.1-preview.1
 + Detailed logging. Explicitly specify `TDbContext` in the log.
 + Multi-targeting for .NET 10.

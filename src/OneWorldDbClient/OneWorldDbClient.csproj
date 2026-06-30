@@ -7,7 +7,7 @@
     <AssemblyName>OneWorldDbClient</AssemblyName>
     <PackageId>OneWorldDbClient</PackageId>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.1-preview.1</Version>
+    <Version>1.1.1-preview.2</Version>
 
     <Authors>@arichika (arichika.taniguchi) / team sirocco, LLC.</Authors>
     <Title>OneWorldDbClient</Title>
@@ -19,10 +19,12 @@
     <RepositoryUrl>https://github.com/SiroccoHub/OneWorldDbClient</RepositoryUrl>
     <PackageLicense>https://github.com/SiroccoHub/OneWorldDbClient/blob/master/LICENSE</PackageLicense>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="../../LICENSE" Pack="true" PackagePath="/" />
+	  <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

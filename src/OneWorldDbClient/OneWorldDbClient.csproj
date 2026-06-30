@@ -7,7 +7,7 @@
     <AssemblyName>OneWorldDbClient</AssemblyName>
     <PackageId>OneWorldDbClient</PackageId>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.1-pre.1</Version>
+    <Version>1.1.1-preview.1</Version>
 
     <Authors>@arichika (arichika.taniguchi) / team sirocco, LLC.</Authors>
     <Title>OneWorldDbClient</Title>

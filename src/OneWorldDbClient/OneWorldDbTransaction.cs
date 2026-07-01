@@ -141,13 +141,13 @@ namespace OneWorldDbClient
         {
             if (--_activeChildren == 0 && TransactionNumber >= 0)
             {
-                _logger?.LogTrace($" _activeChildren:`{_activeChildren}`/TransactionNumber:`{TransactionNumber}`");
-                _logger?.LogTrace($" do TransactionFinalize(`{TransactionId}`)");
+                _logger?.LogTrace(" _activeChildren:`{ActiveChildren}`/TransactionNumber:`{TransactionNumber}`/DbContext:`{TDbContext}`", _activeChildren, TransactionNumber, typeof(TDbContext));
+                _logger?.LogTrace(" do TransactionFinalize(`{TransactionId}`) /DbContext:`{TDbContext}`", TransactionId, typeof(TDbContext));
                 _oneWorldDbClientManager.TransactionFinalize(TransactionId);
             }
             else
             {
-                _logger?.LogTrace($" _activeChildren:`{_activeChildren}`/TransactionNumber:`{TransactionNumber}`");
+                _logger?.LogTrace(" _activeChildren:`{ActiveChildren}`/TransactionNumber:`{TransactionNumber}`/DbContext:`{TDbContext}`", _activeChildren, TransactionNumber, typeof(TDbContext));
             }
         }
 
@@ -164,32 +164,32 @@ namespace OneWorldDbClient
             if (!disposing)
                 return;
 
-            _logger?.LogTrace($" Dispose {nameof(OneWorldDbTransaction<TDbContext>)} start.");
-            _logger?.LogDebug($" totalChildren:`{_totalChildren}`/commits:`{_beCommits}`/rollbacks:`{_beRollbacks}`/TransactionId:`{TransactionId}`/TransactionNumber:`{TransactionNumber}`");
+            _logger?.LogTrace(" Dispose {OneWorldDbTransactionName} start. /DbContext:`{TDbContext}`", nameof(OneWorldDbTransaction<TDbContext>), typeof(TDbContext));
+            _logger?.LogDebug(" totalChildren:`{TotalChildren}`/commits:`{BeCommits}`/rollbacks:`{BeRollbacks}`/TransactionId:`{TransactionId}`/TransactionNumber:`{TransactionNumber}`", _totalChildren, _beCommits, _beRollbacks, TransactionId, TransactionNumber);
 
             if (_totalChildren == _beCommits)
             {
                 _dbTransaction?.Commit();
-                _logger?.LogInformation($" done Commit()./TransactionId:`{TransactionId}`/TransactionNumber:`{TransactionNumber}`");
+                _logger?.LogInformation(" done Commit()./TransactionId:`{TransactionId}`/TransactionNumber:`{TransactionNumber}`/DbContext:`{TDbContext}`", TransactionId, TransactionNumber, typeof(TDbContext));
             }
             else
             {
                 _dbTransaction?.Rollback();
-                _logger?.LogWarning($" done Rollback()./TransactionId:`{TransactionId}`/TransactionNumber:`{TransactionNumber}`");
+                _logger?.LogWarning(" done Rollback()./TransactionId:`{TransactionId}`/TransactionNumber:`{TransactionNumber}`/DbContext:`{TDbContext}`", TransactionId, TransactionNumber, typeof(TDbContext));
             }
 
-            _logger?.LogTrace($" isNull _dbContext=`{_dbContext == null}`");
+            _logger?.LogTrace(" isNull _dbContext=`{IsNull}`. /DbContext:`{TDbContext}`", _dbContext == null, typeof(TDbContext));
             _dbContext?.Dispose();
 
-            _logger?.LogTrace($" isNull _dbTransaction=`{_dbTransaction == null}`");
+            _logger?.LogTrace(" isNull _dbTransaction=`{IsNull}`. /DbContext:`{TDbContext}`", _dbTransaction == null, typeof(TDbContext));
             _dbTransaction?.Dispose();
 
-            _logger?.LogTrace($" isNull _dbConnection=`{_dbConnection == null}`");
+            _logger?.LogTrace(" isNull _dbConnection=`{IsNull}`. /DbContext:`{TDbContext}`", _dbConnection == null, typeof(TDbContext));
             _dbConnection?.Close();
 
             _dbConnection?.Dispose();
 
-            _logger?.LogDebug($" Dispose {nameof(OneWorldDbTransaction<TDbContext>)} done.");
+            _logger?.LogDebug(" Dispose {OneWorldDbTransactionName} done. /DbContext:`{TDbContext}`", nameof(OneWorldDbTransaction<TDbContext>), typeof(TDbContext));
         }
 
 

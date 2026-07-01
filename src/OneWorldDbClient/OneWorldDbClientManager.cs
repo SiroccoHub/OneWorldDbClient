@@ -11,6 +11,7 @@ namespace OneWorldDbClient
     public sealed class OneWorldDbClientManager<TDbContext> : IDisposable where TDbContext : DbContext
     {
         private readonly string _connectionString;
+        private readonly int _connectionStringLength;
 
         private readonly Func<string, IDbConnection> _dbConnectionFactory;
         private readonly Func<IDbConnection, IDbTransaction, TDbContext> _dbContextFactory;
@@ -35,6 +36,7 @@ namespace OneWorldDbClient
             _loggerTx = loggerTx;
 
             _connectionString = connectionString;
+            _connectionStringLength = connectionString?.Length ?? 0;
 
             _dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
             _dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
@@ -75,7 +77,8 @@ namespace OneWorldDbClient
             if (!_transactions.TryGetValue(latestTransactionId, out var transaction))
                 throw new InvalidProgramException($"lost transaction {latestTransactionId}");
 
-            _logger.LogInformation($" Required:TransactionNumber=`{transaction.TransactionNumber}`/TransactionId=`{transaction.TransactionId}`/IsolationLevel=`{transaction.IsolationLevel}`");
+            _logger.LogInformation(" Required:TransactionNumber=`{TransactionTransactionNumber}`/TransactionId=`{TransactionTransactionId}`/IsolationLevel=`{TransactionIsolationLevel}`/DbContext:`{TDbContext}`/ConnectionStringLength:{ConnectionStringLength}",
+                transaction.TransactionNumber, transaction.TransactionId, transaction.IsolationLevel, typeof(TDbContext), _connectionStringLength);
 
             if (!isolationLevel.HasValue || isolationLevel == transaction.IsolationLevel)
                 return await transaction.CreateTransactionScopeAsync(memberName, sourceFilePath, sourceLineNumber);
@@ -135,7 +138,8 @@ namespace OneWorldDbClient
                     dbContextFactory: _dbContextFactory,
                     logger: _loggerTx);
 
-            _logger.LogInformation($" RequiresNew:isSuperRootTx=`{isSuperRootTx}`,TransactionNumber=`{firstTran.TransactionNumber}`/TransactionId=`{firstTran.TransactionId}`/IsolationLevel=`{firstTran.IsolationLevel}`");
+            _logger.LogInformation(" RequiresNew:isSuperRootTx=`{IsSuperRootTx}`,TransactionNumber=`{FirstTranTransactionNumber}`/TransactionId=`{FirstTranTransactionId}`/IsolationLevel=`{FirstTranIsolationLevel}`/DbContext:`{TDbContext}`/ConnectionStringLength:{ConnectionStringLength}",
+                isSuperRootTx, firstTran.TransactionNumber, firstTran.TransactionId, firstTran.IsolationLevel, typeof(TDbContext), _connectionStringLength);
 
             if (!_transactions.TryAdd(firstTran.TransactionId, firstTran))
                 throw new InvalidProgramException($"duplicate transaction id {firstTran.TransactionId}");
@@ -158,13 +162,13 @@ namespace OneWorldDbClient
                         {
                             if (_transactions.TryRemove(endedSubTransactionId, out var transaction))
                             {
-                                _logger?.LogTrace($" sub.tx={endedSubTransactionId} Disposing.");
+                                _logger?.LogTrace(" sub.tx={EndedSubTransactionId} Disposing.", endedSubTransactionId);
                                 transaction.Dispose();
-                                _logger?.LogDebug($" sub.tx={endedSubTransactionId} Disposed and Removed.");
+                                _logger?.LogDebug(" sub.tx={EndedSubTransactionId} Disposed and Removed.", endedSubTransactionId);
                             }
                             else
                             {
-                                _logger?.LogDebug($" sub.tx={endedSubTransactionId} Already Removed.");
+                                _logger?.LogDebug(" sub.tx={EndedSubTransactionId} Already Removed.", endedSubTransactionId);
                             }
                         }
                         else
@@ -192,7 +196,7 @@ namespace OneWorldDbClient
             if (!disposing)
                 return;
 
-            _logger?.LogDebug($" Dispose {nameof(OneWorldDbClientManager<TDbContext>)} start.");
+            _logger?.LogDebug(" Dispose {OneWorldDbClientManagerName} start. /DbContext:`{TDbContext}`", nameof(OneWorldDbClientManager<TDbContext>), typeof(TDbContext));
 
             while (_publishedTransactionStack.Count > 0)
             {
@@ -200,17 +204,17 @@ namespace OneWorldDbClient
 
                 if (_transactions.TryRemove(latestTransactionId, out var transaction))
                 {
-                    _logger?.LogDebug($" tx={latestTransactionId} Disposing.");
+                    _logger?.LogDebug(" tx={LatestTransactionId} Disposing. /DbContext:`{TDbContext}`", latestTransactionId, typeof(TDbContext));
                     transaction.Dispose();
-                    _logger?.LogDebug($" tx={latestTransactionId} Disposed and Removed.");
+                    _logger?.LogDebug(" tx={LatestTransactionId} Disposed and Removed. /DbContext:`{TDbContext}`", latestTransactionId, typeof(TDbContext));
                 }
                 else
                 {
-                    _logger?.LogDebug($" tx={latestTransactionId} Already Removed.");
+                    _logger?.LogDebug(" tx={LatestTransactionId} Already Removed. /DbContext:`{TDbContext}`", latestTransactionId, typeof(TDbContext));
                 }
             }
 
-            _logger?.LogInformation($" Dispose {nameof(OneWorldDbClientManager<TDbContext>)} ended.");
+            _logger?.LogInformation(" Dispose {OneWorldDbClientManagerName} ended. /DbContext:`{TDbContext}`", nameof(OneWorldDbClientManager<TDbContext>), typeof(TDbContext));
         }
 
 

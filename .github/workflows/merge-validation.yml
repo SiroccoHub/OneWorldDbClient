@@ -12,15 +12,15 @@ on:
     - feature/*
 jobs:
   build-with-test:
-    runs-on: windows-2019
+    runs-on: windows-2025
     env:
       buildConfiguration: Release
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 10.0.x
     - name: Install dependencies
       run: dotnet restore
     - name: Init sqllocaldb
@@ -32,6 +32,7 @@ jobs:
           DEL /F /Q %USERPROFILE%\\N2SqlLocalDB.*.ldf
         )
         sqllocaldb create N2SqlLocalDB -s
+        sqllocaldb start N2SqlLocalDB
         sqllocaldb info N2SqlLocalDB
       shell: cmd
     - name: Build
